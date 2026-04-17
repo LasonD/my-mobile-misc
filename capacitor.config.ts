@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'my-mobile-misc',
+  appName: 'Даша і КШЕ',
   webDir: 'www',
   server: {
     url: 'http://192.168.0.145:8100',

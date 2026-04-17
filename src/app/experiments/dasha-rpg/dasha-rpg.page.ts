@@ -8,6 +8,7 @@ import {
 import * as Phaser from 'phaser';
 
 import { RpgScene } from './render/rpg-scene';
+import { TitleScene } from './render/title-scene';
 
 @Component({
   selector: 'app-dasha-rpg',
@@ -46,7 +47,7 @@ export class DashaRpgPage implements AfterViewInit, OnDestroy {
         default: 'arcade',
         arcade: { debug: false, gravity: { x: 0, y: 0 } },
       },
-      scene: [RpgScene],
+      scene: [TitleScene, RpgScene],
     });
   }
 

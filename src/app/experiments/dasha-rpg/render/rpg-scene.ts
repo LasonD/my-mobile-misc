@@ -7,6 +7,7 @@ import { getLocation } from '../content/locations';
 import { getQuest } from '../content/quests';
 import { getScenario } from '../content/scenarios/index';
 import { StoryEngine } from '../engine/story-engine';
+import { SaveManager } from './save-manager';
 import {
   CharacterId,
   CharacterOnStage,
@@ -60,13 +61,15 @@ export class RpgScene extends Phaser.Scene {
     super('rpg');
   }
 
-  create() {
+  create(data: { load?: boolean } = {}) {
     buildDashaTextures(this);
 
     this.drawBaseBackground();
     this.buildDialogueUi();
+    this.buildBackButton();
 
-    this.engine = new StoryEngine();
+    const saved = data.load ? SaveManager.load() : null;
+    this.engine = new StoryEngine(saved ?? undefined);
     this.bindEngine();
 
     this.input.on('pointerdown', this.onPointerDown, this);
@@ -79,11 +82,20 @@ export class RpgScene extends Phaser.Scene {
       this.scale.off('resize', this.onResize, this);
     });
 
-    const scenario = getScenario('first_day');
+    const scenarioId = saved?.currentScenario ?? 'first_day';
+    const scenario = getScenario(scenarioId);
     if (!scenario) {
-      throw new Error('first_day scenario not registered');
+      throw new Error(`${scenarioId} scenario not registered`);
     }
-    this.engine.start(scenario);
+
+    if (saved && saved.currentNode) {
+      // Restore: attach scenario and resume at the saved node.
+      (this.engine as unknown as { scenario: unknown }).scenario = scenario;
+      this.engine.state.currentScenario = scenario.id;
+      this.engine.goto(saved.currentNode);
+    } else {
+      this.engine.start(scenario);
+    }
   }
 
   // ---------------- Base background ----------------
@@ -100,6 +112,7 @@ export class RpgScene extends Phaser.Scene {
   // ---------------- Engine bindings ----------------
 
   private bindEngine() {
+    this.engine.on(EngineEvents.NodeEntered, () => SaveManager.save(this.engine.state));
     this.engine.on(EngineEvents.LocationChanged, this.onLocationChanged, this);
     this.engine.on(EngineEvents.CharactersChanged, this.onCharactersChanged, this);
     this.engine.on(EngineEvents.LineShown, this.onLineShown, this);
@@ -111,6 +124,25 @@ export class RpgScene extends Phaser.Scene {
     this.engine.on(EngineEvents.SoundRequested, (payload: { sound: SoundKey }) =>
       this.playSfx(payload.sound)
     );
+  }
+
+  private buildBackButton() {
+    const { width } = this.scale;
+    const x = width - 16;
+    const y = 14;
+    const btn = this.add
+      .text(x, y, '↩ меню', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '13px',
+        color: '#baa6d4',
+        fontStyle: 'italic',
+        backgroundColor: '#1a1428',
+        padding: { left: 10, right: 10, top: 6, bottom: 6 },
+      })
+      .setOrigin(1, 0)
+      .setDepth(35)
+      .setInteractive({ useHandCursor: true });
+    btn.on('pointerup', () => this.scene.start('title'));
   }
 
   // ---------------- Input ----------------
@@ -489,7 +521,7 @@ export class RpgScene extends Phaser.Scene {
       .setDepth(41);
 
     const btn = this.add
-      .text(width / 2, height / 2 + 30, '  Почати спочатку  ', {
+      .text(width / 2, height / 2 + 30, '  До меню  ', {
         fontFamily: 'Georgia, serif',
         fontSize: '18px',
         color: '#1a1428',
@@ -499,7 +531,7 @@ export class RpgScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(41)
       .setInteractive({ useHandCursor: true });
-    btn.on('pointerup', () => this.scene.restart());
+    btn.on('pointerup', () => this.scene.start('title'));
 
     this.playSfx('finale');
   }
