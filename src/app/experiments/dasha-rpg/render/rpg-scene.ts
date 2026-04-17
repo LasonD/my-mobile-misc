@@ -61,14 +61,18 @@ export class RpgScene extends Phaser.Scene {
     super('rpg');
   }
 
-  create(data: { load?: boolean } = {}) {
+  create(data: { scenarioId?: string; load?: boolean } = {}) {
     buildDashaTextures(this);
 
     this.drawBaseBackground();
     this.buildDialogueUi();
     this.buildBackButton();
 
-    const saved = data.load ? SaveManager.load() : null;
+    // Always load the persisted global state (flags/stats accumulated across
+    // scenarios) so cross-chapter callbacks still work. When `load` is false,
+    // we discard the saved scenario pointer and start at the chosen scenario's
+    // startNode instead.
+    const saved = SaveManager.load();
     this.engine = new StoryEngine(saved ?? undefined);
     this.bindEngine();
 
@@ -82,18 +86,22 @@ export class RpgScene extends Phaser.Scene {
       this.scale.off('resize', this.onResize, this);
     });
 
-    const scenarioId = saved?.currentScenario ?? 'first_day';
+    const scenarioId = data.scenarioId ?? saved?.currentScenario ?? 'first_day';
     const scenario = getScenario(scenarioId);
     if (!scenario) {
       throw new Error(`${scenarioId} scenario not registered`);
     }
 
-    if (saved && saved.currentNode) {
-      // Restore: attach scenario and resume at the saved node.
+    const resuming =
+      !!data.load && !!saved && saved.currentScenario === scenarioId && !!saved.currentNode;
+
+    if (resuming) {
       (this.engine as unknown as { scenario: unknown }).scenario = scenario;
       this.engine.state.currentScenario = scenario.id;
-      this.engine.goto(saved.currentNode);
+      this.engine.goto(saved!.currentNode!);
     } else {
+      // Fresh start of this scenario, keep global state (flags/stats).
+      this.engine.state.history = [];
       this.engine.start(scenario);
     }
   }
@@ -204,13 +212,19 @@ export class RpgScene extends Phaser.Scene {
       }
     }
 
+    // Characters sit on an invisible "stage" line that is 12 px above the
+    // dialogue box top. Sprite origins are bottom-center so this keeps them
+    // from being clipped by the text panel on any screen size.
+    const dialogBoxH = Math.min(240, this.scale.height * 0.38);
+    const stageY = this.scale.height - dialogBoxH - 24;
+
     // Add/update current characters
     for (const placement of characters) {
       const def = getCharacter(placement.id);
       if (!def) continue;
       const existing = this.stage.get(placement.id);
       const targetX = this.scale.width * POSITION_TO_FRAC[placement.position];
-      const targetY = this.scale.height * 0.74;
+      const targetY = stageY;
 
       if (existing) {
         this.tweens.add({

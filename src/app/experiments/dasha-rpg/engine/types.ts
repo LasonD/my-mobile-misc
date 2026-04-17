@@ -183,6 +183,27 @@ export interface Scenario {
   nodes: Record<NodeId, StoryNode>;
 }
 
+export interface ScenarioMeta {
+  /** Display order in the level-select list. */
+  order: number;
+  /** Short description under the title in the list. */
+  description: string;
+  /** Emoji shown as icon — e.g. '\u{1F393}' (graduation cap). */
+  icon?: string;
+  /**
+   * If set, scenario is locked until the condition evaluates true against
+   * the global GameState. Lets later chapters require earlier ones.
+   */
+  unlock?: Condition;
+  /** Condition that marks the scenario as completed. Typically checks a flag/quest. */
+  done?: Condition;
+}
+
+export interface ScenarioRegistration {
+  scenario: Scenario;
+  meta: ScenarioMeta;
+}
+
 // ---------------- Quests ----------------
 
 export interface QuestDef {

@@ -7,20 +7,19 @@ const PIXEL_SIZE = 4;
 
 const PALETTE: Record<string, number | null> = {
   '.': null,
-  'H': 0x3a2823, // hair (dark)
+  'H': 0x3a2823, // hair (dark brown)
   'h': 0x5a3e33, // hair highlight
   'S': 0xfad0ab, // skin
   's': 0xe8ba8d, // skin shadow
-  'G': 0x1c1f2e, // glasses / eye dark
-  'L': 0xffffff, // eye catchlight
+  'G': 0x1c1f2e, // eye dark
+  'L': 0xffffff, // catchlight / white
   'M': 0xc94978, // lips
   'C': 0xff9eb8, // blush
-  'B': 0xcdb4db, // sweater
-  'b': 0xa593c4, // sweater shade
-  'T': 0xe0cfec, // sweater collar highlight
-  'N': 0xffd700, // necklace
-  'W': 0xffffff, // pearl / diploma edge
-  'O': 0xf1c179, // diploma parchment
+  'P': 0xd49fb2, // pink jacket
+  'p': 0xb58599, // pink jacket shade
+  'W': 0xffffff, // white collar
+  'Z': 0x7a5566, // zipper line
+  'N': 0xffd700, // (reserved) gold accent
 };
 
 // Full-body-ish: head, shoulders, sweater with a tiny book (КШЕ diploma).
@@ -34,9 +33,9 @@ const DASHA_FRAME_IDLE = [
   '...HHSSSSSSSSSSSSSSSSSSSSH..', // 6
   '...HHSSSSSSSSSSSSSSSSSSSSSH.', // 7
   '...HSSSSSSSSSSSSSSSSSSSSSSH.', // 8
-  '...HSSGGGGGSSSSSSSSGGGGGSSH.', // 9  (glasses tops)
-  '...HSGGGLGGGGGGGGGGGLGGGSSH.', // 10 (eyes inside glasses)
-  '...HSSGGGGGSSSSSSSSGGGGGSSH.', // 11 (glasses bottoms)
+  '...HSSSSSSSSSSSSSSSSSSSSSSH.', // 9  (no glasses)
+  '...HSSSSSGGSSSSSSSSGGSSSSSH.', // 10 (eyes — two small pupils)
+  '...HSSSSSSSSSSSSSSSSSSSSSSH.', // 11 (no glasses)
   '...HSSSSSSSSSSGGSSSSSSSSSSH.', // 12 (nose)
   '...HSSCSSSSSSSSSSSSSSSCCSSH.', // 13 (blush)
   '...HSSSSSSSSSMMMMMMSSSSSSSH.', // 14 (smile)
@@ -46,25 +45,26 @@ const DASHA_FRAME_IDLE = [
   '......HSSSSSSSSSSSSSSSH.....', // 18 chin
   '.......HSSSSSSSSSSSSSH......', // 19
   '........SSSSSSSSSSSS........', // 20 neck
-  '.......SSSSSSSSSSSSSS.......', // 21
-  '.....BBBBBBBBTTTBBBBBBBB....', // 22 collar
-  '...BBBBBBBBBBTTBBBBBBBBBBB..', // 23
-  '..BBBbBBBBBBBBBBBBBBBBbBBB..', // 24
-  '..BBBBBBBBBBBBNBBBBBBBBBBBB.', // 25 necklace
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 26
-  '..BbBBBBBBBBBBBBBBBBBBBBBBB.', // 27
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 28
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 29
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 30
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 31
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 32
-  '..BBBBBBBBBBBBBBBBBBBBBBBBB.', // 33
+  '.......HSSSSSSSSSSSSH.......', // 21 hair curving forward onto shoulders
+  '.....HHHWWWWWWWWWWHHH.......', // 22 white collar, hair peeking
+  '....HPPPPPWWWWWWPPPPPH......', // 23 pink jacket + V-collar
+  '...HPPPPPPPPZPPPPPPPPPH.....', // 24 zipper starts
+  '...PPPPPPPPPZPPPPPPPPPPP....', // 25
+  '..PPpPPPPPPPZPPPPPPPPPpPP...', // 26 side shading
+  '..PPPPPPPPPPZPPPPPPPPPPPP...', // 27
+  '..PPPPPPPPPPZPPPPPPPPPPPPP..', // 28
+  '..PPpPPPPPPPZPPPPPPPPPpPPPP.', // 29
+  '..PPPPPPPPPPPPPPPPPPPPPPPPP.', // 30
+  '..PPPPPPPPPPPPPPPPPPPPPPPPP.', // 31
+  '..PPPPPPPPPPPPPPPPPPPPPPPPP.', // 32
+  '..PPPPPPPPPPPPPPPPPPPPPPPPP.', // 33
 ];
 
-// Blink frame — same as idle but eyes closed (G instead of L pixel).
+// Blink frame — eyes replaced with skin (closed).
 const DASHA_FRAME_BLINK = DASHA_FRAME_IDLE.map((row, i) => {
   if (i !== 10) return row;
-  return '...HSGGGGGGGGGGGGGGGGGGGGGSSH.'.slice(0, row.length);
+  // Two tiny dashes instead of round pupils
+  return '...HSSSSSSSSSSSSSSSSSSSSSSSH.';
 });
 
 function drawPixels(

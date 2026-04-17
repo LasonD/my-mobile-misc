@@ -3,21 +3,19 @@ import * as Phaser from 'phaser';
 import { buildDashaTextures } from '../../dasha/scenes/dasha-sprite';
 import { SoftSounds } from '../../dasha/scenes/soft-sounds';
 import { TITLE_FACTS } from '../content/facts';
-import { SaveManager, SaveSummary } from './save-manager';
+import { UPCOMING, listScenarios } from '../content/scenarios/index';
+import { evaluate } from '../engine/evaluators';
+import { GameState } from '../engine/types';
+import { SaveManager } from './save-manager';
 
-const FACT_INTERVAL_MS = 5000;
-
-export interface TitleStartPayload {
-  /** Set when returning from RpgScene after scenario end. */
-  returning?: boolean;
-}
+const FACT_INTERVAL_MS = 11000;
 
 export class TitleScene extends Phaser.Scene {
   private sfx = new SoftSounds();
   private factText?: Phaser.GameObjects.Text;
-  private factIndex = 0;
   private factTimer?: Phaser.Time.TimerEvent;
-  private sparkleTimer?: Phaser.Time.TimerEvent;
+  private factOrder: number[] = [];
+  private factCursor = 0;
 
   constructor() {
     super('title');
@@ -25,21 +23,25 @@ export class TitleScene extends Phaser.Scene {
 
   create() {
     buildDashaTextures(this);
+    this.factOrder = this.shuffledIndices(TITLE_FACTS.length);
+
     this.drawBackground();
     this.drawSparkles();
-    this.drawDasha();
-    this.drawTitle();
-    this.drawMenu();
-    this.drawProgress();
+
+    const state = SaveManager.load();
+
+    const isNarrow = this.scale.width < 560;
+
+    this.drawTitle(isNarrow);
+    this.drawDasha(isNarrow);
+    this.drawLevelSelect(state, isNarrow);
     this.drawFactTicker();
 
     this.input.once('pointerdown', () => this.sfx.resume());
-
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => {
       this.sfx.dispose();
       this.factTimer?.remove();
-      this.sparkleTimer?.remove();
       this.scale.off('resize', this.onResize, this);
     });
   }
@@ -52,7 +54,6 @@ export class TitleScene extends Phaser.Scene {
     bg.fillGradientStyle(0x1a1220, 0x221632, 0x3d2352, 0x5c3b7a, 1);
     bg.fillRect(0, 0, width, height);
 
-    // Deco arcs
     const arc = this.add.graphics();
     arc.lineStyle(2, 0xcdb4db, 0.2);
     for (let r = 120; r < Math.max(width, height); r += 80) {
@@ -64,7 +65,7 @@ export class TitleScene extends Phaser.Scene {
     const { width, height } = this.scale;
     for (let i = 0; i < 50; i++) {
       const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height * 0.8);
+      const y = Phaser.Math.Between(0, height * 0.7);
       const r = Phaser.Math.FloatBetween(0.6, 1.8);
       const dot = this.add.circle(x, y, r, 0xffffff, Phaser.Math.FloatBetween(0.3, 0.8));
       this.tweens.add({
@@ -78,11 +79,52 @@ export class TitleScene extends Phaser.Scene {
     }
   }
 
-  private drawDasha() {
+  // ---------- Title ----------
+
+  private drawTitle(narrow: boolean) {
     const { width, height } = this.scale;
-    const container = this.add.container(width * 0.25, height * 0.55);
-    const sprite = this.add.sprite(0, 0, 'dasha_idle').setOrigin(0.5, 1).setScale(1.1);
-    const shadow = this.add.ellipse(0, 12, 120, 18, 0x000000, 0.35);
+    const cx = width / 2;
+    const y = height * (narrow ? 0.08 : 0.1);
+
+    const title = this.add
+      .text(cx, y, 'Пригоди Даши', {
+        fontFamily: 'Georgia, serif',
+        fontSize: narrow ? '44px' : '58px',
+        color: '#ffd36a',
+        fontStyle: 'bold',
+        stroke: '#3a1a4a',
+        strokeThickness: 5,
+      })
+      .setOrigin(0.5);
+
+    const sub = this.add
+      .text(cx, y + title.height * 0.7, 'Глава 1 · Перший курс', {
+        fontFamily: 'Georgia, serif',
+        fontSize: narrow ? '16px' : '20px',
+        color: '#cdb4db',
+        fontStyle: 'italic',
+      })
+      .setOrigin(0.5);
+
+    const flourish = this.add.graphics();
+    flourish.lineStyle(2, 0xffd36a, 0.8);
+    flourish.beginPath();
+    flourish.moveTo(cx - 70, sub.y + 18);
+    flourish.lineTo(cx + 70, sub.y + 18);
+    flourish.strokePath();
+  }
+
+  // ---------- Dasha ----------
+
+  private drawDasha(narrow: boolean) {
+    const { width, height } = this.scale;
+    const cx = width / 2;
+    const y = height * (narrow ? 0.4 : 0.38);
+    const scale = narrow ? 0.95 : 1.1;
+
+    const container = this.add.container(cx, y);
+    const shadow = this.add.ellipse(0, 10, 110 * scale, 16, 0x000000, 0.35);
+    const sprite = this.add.sprite(0, 0, 'dasha_idle').setOrigin(0.5, 1).setScale(scale);
     container.add([shadow, sprite]);
 
     const blinker = this.time.addEvent({
@@ -106,202 +148,168 @@ export class TitleScene extends Phaser.Scene {
     });
   }
 
-  // ---------- Title ----------
+  // ---------- Level select ----------
 
-  private drawTitle() {
+  private drawLevelSelect(state: GameState | null, narrow: boolean) {
     const { width, height } = this.scale;
-    const centerX = width * 0.62;
-    const titleY = height * 0.22;
+    const listTop = height * (narrow ? 0.48 : 0.5);
+    const listBottom = height * 0.88;
+    const listHeight = listBottom - listTop;
 
-    const title = this.add
-      .text(centerX, titleY, 'Даша', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '72px',
-        color: '#ffd36a',
-        fontStyle: 'bold',
-        stroke: '#3a1a4a',
-        strokeThickness: 6,
-      })
-      .setOrigin(0.5);
+    const entries: LevelEntry[] = [];
 
-    const sub = this.add
-      .text(centerX, titleY + 56, 'Хроніки КШЕ', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '28px',
-        color: '#cdb4db',
-        fontStyle: 'italic',
-      })
-      .setOrigin(0.5);
-
-    // Underline flourish
-    const flourish = this.add.graphics();
-    flourish.lineStyle(2, 0xffd36a, 0.8);
-    flourish.beginPath();
-    flourish.moveTo(centerX - 80, titleY + 82);
-    flourish.lineTo(centerX + 80, titleY + 82);
-    flourish.strokePath();
-
-    this.tweens.add({
-      targets: [title, sub, flourish],
-      alpha: { from: 0, to: 1 },
-      y: '-=8',
-      duration: 600,
-      ease: 'Sine.easeOut',
-    });
-  }
-
-  // ---------- Menu ----------
-
-  private drawMenu() {
-    const { width, height } = this.scale;
-    const hasSave = SaveManager.exists();
-
-    const items: MenuItem[] = [];
-    if (hasSave) {
-      items.push({
-        label: 'Продовжити',
-        hint: 'Завантажити збереження',
-        color: 0xffd36a,
-        onClick: () => this.startGame({ load: true }),
+    // Resume entry (if mid-scenario)
+    const midway =
+      state && state.currentScenario && state.currentNode && !this.isScenarioDone(state, state.currentScenario);
+    if (midway) {
+      const reg = listScenarios().find((r) => r.scenario.id === state!.currentScenario);
+      entries.push({
+        kind: 'resume',
+        title: '⏵ Продовжити',
+        description: reg ? `${reg.scenario.title} — ${state!.currentNode}` : 'Недавня сесія',
+        icon: '\u{1F4CD}',
+        status: 'available',
+        onClick: () => this.startScenario(state!.currentScenario!, { load: true }),
       });
     }
-    items.push({
-      label: hasSave ? 'Почати спочатку' : 'Почати',
-      hint: 'Перший день у КШЕ',
-      color: 0xcdb4db,
-      onClick: () => {
-        SaveManager.clear();
-        this.startGame({ load: false });
-      },
-    });
-    items.push({
-      label: 'Про гру',
-      hint: 'Хто такі Даша й Валерія',
-      color: 0xa8b8d4,
-      onClick: () => this.showAbout(),
-    });
 
-    const startX = width * 0.55;
-    const startY = height * 0.42;
-    const btnW = Math.min(width * 0.4, 360);
-    items.forEach((item, i) => {
-      this.renderMenuButton(startX, startY + i * 74, btnW, item);
+    // Registered scenarios
+    for (const reg of listScenarios()) {
+      const done = this.isScenarioDone(state, reg.scenario.id);
+      const locked = reg.meta.unlock && state
+        ? !evaluate(reg.meta.unlock, state)
+        : false;
+      entries.push({
+        kind: 'scenario',
+        title: reg.scenario.title,
+        description: reg.meta.description,
+        icon: reg.meta.icon ?? '\u{1F4D6}',
+        status: done ? 'completed' : locked ? 'locked' : 'available',
+        onClick: locked
+          ? () => { /* no-op */ }
+          : () => this.startScenario(reg.scenario.id, { load: false }),
+      });
+    }
+
+    // Upcoming placeholders
+    for (const meta of UPCOMING) {
+      entries.push({
+        kind: 'upcoming',
+        title: 'Незабаром',
+        description: meta.description,
+        icon: meta.icon ?? '\u{1F552}',
+        status: 'locked',
+        onClick: () => { /* no-op */ },
+      });
+    }
+
+    const maxCount = Math.max(entries.length, 1);
+    const totalGap = 10;
+    const cardH = Math.min(76, Math.floor((listHeight - totalGap * (maxCount - 1)) / maxCount));
+    const cardW = Math.min(width - 32, 440);
+    const startX = (width - cardW) / 2;
+
+    entries.forEach((entry, i) => {
+      const y = listTop + i * (cardH + totalGap);
+      this.renderLevelCard(startX, y, cardW, cardH, entry);
     });
   }
 
-  private renderMenuButton(x: number, y: number, w: number, item: MenuItem) {
-    const h = 60;
-    const left = x;
+  private renderLevelCard(x: number, y: number, w: number, h: number, entry: LevelEntry) {
+    const dim = entry.status === 'locked';
+    const color = entry.status === 'completed' ? 0x8ed29a : entry.status === 'available' ? 0xcdb4db : 0x6b5e7d;
+    const bgColor = dim ? 0x1a1428 : 0x2a1c3a;
 
     const bg = this.add.graphics();
-    bg.fillStyle(0x2a1c3a, 0.92);
-    bg.fillRoundedRect(left, y, w, h, 12);
-    bg.lineStyle(3, item.color, 1);
-    bg.strokeRoundedRect(left, y, w, h, 12);
+    bg.fillStyle(bgColor, 0.92);
+    bg.fillRoundedRect(x, y, w, h, 12);
+    bg.lineStyle(2, color, dim ? 0.5 : 1);
+    bg.strokeRoundedRect(x, y, w, h, 12);
 
-    const label = this.add.text(left + 20, y + 10, item.label, {
+    const iconBg = this.add.circle(x + 32, y + h / 2, 20, 0x1a1428, 0.7);
+    iconBg.setStrokeStyle(1, color, dim ? 0.5 : 1);
+    this.add
+      .text(x + 32, y + h / 2, entry.icon, {
+        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
+        fontSize: '22px',
+      })
+      .setOrigin(0.5);
+
+    this.add.text(x + 60, y + 10, entry.title, {
       fontFamily: 'Georgia, serif',
-      fontSize: '22px',
-      color: '#fdf6f3',
+      fontSize: '17px',
+      color: dim ? '#8a7a9e' : '#fdf6f3',
       fontStyle: 'bold',
     });
-    const hint = this.add.text(left + 20, y + 36, item.hint, {
+    this.add.text(x + 60, y + h - 28, entry.description, {
       fontFamily: 'Georgia, serif',
-      fontSize: '13px',
-      color: '#baa6d4',
+      fontSize: '12px',
+      color: dim ? '#5e5373' : '#baa6d4',
       fontStyle: 'italic',
+      wordWrap: { width: w - 80 },
     });
 
-    const zone = this.add.zone(left, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true });
-    zone.on('pointerover', () => {
-      this.tweens.add({ targets: [bg, label, hint], scale: 1.02, duration: 120 });
-      bg.clear();
-      bg.fillStyle(0x3a2a4a, 0.95);
-      bg.fillRoundedRect(left, y, w, h, 12);
-      bg.lineStyle(3, item.color, 1);
-      bg.strokeRoundedRect(left, y, w, h, 12);
-    });
-    zone.on('pointerout', () => {
-      this.tweens.add({ targets: [bg, label, hint], scale: 1, duration: 120 });
-      bg.clear();
-      bg.fillStyle(0x2a1c3a, 0.92);
-      bg.fillRoundedRect(left, y, w, h, 12);
-      bg.lineStyle(3, item.color, 1);
-      bg.strokeRoundedRect(left, y, w, h, 12);
-    });
-    zone.on('pointerup', () => {
-      this.sfx.good();
-      item.onClick();
-    });
+    const badge = entry.status === 'completed' ? '✓' : entry.status === 'locked' ? '🔒' : '▶';
+    this.add
+      .text(x + w - 16, y + h / 2, badge, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '18px',
+        color: dim ? '#5e5373' : '#fdf6f3',
+      })
+      .setOrigin(1, 0.5);
+
+    if (entry.status !== 'locked') {
+      const zone = this.add.zone(x, y, w, h).setOrigin(0).setInteractive({ useHandCursor: true });
+      zone.on('pointerover', () => {
+        bg.clear();
+        bg.fillStyle(0x3a2a4a, 0.95);
+        bg.fillRoundedRect(x, y, w, h, 12);
+        bg.lineStyle(2, color, 1);
+        bg.strokeRoundedRect(x, y, w, h, 12);
+      });
+      zone.on('pointerout', () => {
+        bg.clear();
+        bg.fillStyle(bgColor, 0.92);
+        bg.fillRoundedRect(x, y, w, h, 12);
+        bg.lineStyle(2, color, 1);
+        bg.strokeRoundedRect(x, y, w, h, 12);
+      });
+      zone.on('pointerup', () => {
+        this.sfx.good();
+        entry.onClick();
+      });
+    }
   }
 
-  // ---------- Progress ----------
+  private startScenario(id: string, opts: { load: boolean }) {
+    this.factTimer?.remove();
+    this.scene.start('rpg', { scenarioId: id, load: opts.load });
+  }
 
-  private drawProgress() {
-    const summary = SaveManager.summary();
-    if (!summary) return;
-
-    const { width, height } = this.scale;
-    const panelW = Math.min(width * 0.5, 340);
-    const panelH = 82;
-    const x = width * 0.04;
-    const y = height - panelH - 56;
-
-    const bg = this.add.graphics();
-    bg.fillStyle(0x1a1428, 0.9);
-    bg.fillRoundedRect(x, y, panelW, panelH, 12);
-    bg.lineStyle(2, 0xcdb4db, 0.8);
-    bg.strokeRoundedRect(x, y, panelW, panelH, 12);
-
-    this.add.text(x + 14, y + 10, 'Прогрес', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '14px',
-      color: '#cdb4db',
-      fontStyle: 'bold',
-    });
-    this.add.text(
-      x + 14,
-      y + 30,
-      `Квестів пройдено: ${summary.questsCompleted}`,
-      {
-        fontFamily: 'Georgia, serif',
-        fontSize: '13px',
-        color: '#fdf6f3',
-      }
-    );
-    this.add.text(
-      x + 14,
-      y + 48,
-      `Вузлів пройдено: ${summary.nodesVisited}`,
-      {
-        fontFamily: 'Georgia, serif',
-        fontSize: '13px',
-        color: '#fdf6f3',
-      }
-    );
-    const saved = summary.savedAt ? this.formatTimestamp(summary.savedAt) : '—';
-    this.add.text(x + 14, y + 66, `Збережено: ${saved}`, {
-      fontFamily: 'Georgia, serif',
-      fontSize: '11px',
-      color: '#baa6d4',
-    });
+  private isScenarioDone(state: GameState | null, id: string): boolean {
+    if (!state) return false;
+    const reg = listScenarios().find((r) => r.scenario.id === id);
+    if (!reg?.meta.done) return false;
+    return evaluate(reg.meta.done, state);
   }
 
   // ---------- Fact ticker ----------
 
   private drawFactTicker() {
     const { width, height } = this.scale;
-    const y = height - 28;
+    // Place just above the bottom, but with margin for safe area (already inset by CSS).
+    const y = height - 18;
     this.factText = this.add
       .text(width / 2, y, '', {
         fontFamily: 'Georgia, serif',
-        fontSize: '13px',
-        color: '#baa6d4',
+        fontSize: '12.5px',
+        color: '#cdb4db',
         fontStyle: 'italic',
         align: 'center',
-        wordWrap: { width: width - 60 },
+        wordWrap: { width: width - 32 },
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5, 1)
+      .setDepth(50);
 
     this.showFact();
     this.factTimer = this.time.addEvent({
@@ -313,83 +321,42 @@ export class TitleScene extends Phaser.Scene {
 
   private showFact() {
     if (!this.factText) return;
-    const next = TITLE_FACTS[this.factIndex % TITLE_FACTS.length];
-    this.factIndex++;
+    const idx = this.factOrder[this.factCursor % this.factOrder.length];
+    this.factCursor++;
+    const next = TITLE_FACTS[idx];
 
     this.tweens.add({
       targets: this.factText,
       alpha: 0,
-      duration: 350,
+      duration: 400,
       onComplete: () => {
         this.factText!.setText(next);
-        this.tweens.add({ targets: this.factText, alpha: 1, duration: 420 });
+        this.tweens.add({ targets: this.factText, alpha: 1, duration: 500 });
       },
     });
   }
 
-  // ---------- About modal ----------
-
-  private formatTimestamp(ts: number): string {
-    const d = new Date(ts);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-
-  private showAbout() {
-    const { width, height } = this.scale;
-    const container = this.add.container(0, 0).setDepth(50);
-
-    const overlay = this.add
-      .rectangle(0, 0, width, height, 0x000000, 0.75)
-      .setOrigin(0)
-      .setInteractive();
-    const text = this.add
-      .text(
-        width / 2,
-        height / 2,
-        [
-          'Даша: Хроніки КШЕ',
-          '',
-          'Рольова гра про першокурсницю психологічного факультету',
-          'Київської школи економіки.',
-          '',
-          'Вибори мають значення. Персонажі реальні. Жарти — теж.',
-          '',
-          'Тап — закрити',
-        ].join('\n'),
-        {
-          fontFamily: 'Georgia, serif',
-          fontSize: '16px',
-          color: '#fdf6f3',
-          align: 'center',
-          lineSpacing: 6,
-          wordWrap: { width: width * 0.8 },
-        }
-      )
-      .setOrigin(0.5);
-
-    container.add([overlay, text]);
-    overlay.on('pointerup', () => container.destroy());
-  }
-
-  // ---------- Navigation ----------
-
-  private startGame(opts: { load: boolean }) {
-    this.factTimer?.remove();
-    this.scene.start('rpg', opts);
+  private shuffledIndices(n: number): number[] {
+    const arr = Array.from({ length: n }, (_, i) => i);
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
   // ---------- Resize ----------
 
   private onResize = () => {
-    // Simple strategy: restart scene to re-layout.
     this.scene.restart();
   };
 }
 
-interface MenuItem {
-  label: string;
-  hint: string;
-  color: number;
+interface LevelEntry {
+  kind: 'resume' | 'scenario' | 'upcoming';
+  title: string;
+  description: string;
+  icon: string;
+  status: 'available' | 'completed' | 'locked';
   onClick: () => void;
 }
