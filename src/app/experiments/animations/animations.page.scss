@@ -1,0 +1,44 @@
+.demo {
+  margin-bottom: 32px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+.pulse-box {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6a5cff, #3880ff);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.drag-card {
+  width: 180px;
+  height: 100px;
+  border-radius: 12px;
+  background: var(--ion-color-warning);
+  color: var(--ion-color-warning-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  touch-action: none;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

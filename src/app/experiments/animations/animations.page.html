@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Animations & Gestures</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <section class="demo">
+    <h3>AnimationController</h3>
+    <p>Tap to play a keyframe animation.</p>
+    <div #pulseBox class="pulse-box" (click)="playPulse()">Pulse</div>
+  </section>
+
+  <section class="demo">
+    <h3>GestureController</h3>
+    <p>Drag the card — it snaps back on release.</p>
+    <div #dragCard class="drag-card">
+      <ion-icon name="move-outline"></ion-icon>
+      <span>Drag me</span>
+    </div>
+  </section>
+</ion-content>

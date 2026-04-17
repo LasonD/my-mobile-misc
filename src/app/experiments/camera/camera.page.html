@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Camera</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="actions">
+    <ion-button expand="block" (click)="capture('camera')" [disabled]="loading">
+      <ion-icon slot="start" name="camera-outline"></ion-icon>
+      Take photo
+    </ion-button>
+    <ion-button
+      expand="block"
+      fill="outline"
+      (click)="capture('gallery')"
+      [disabled]="loading"
+    >
+      <ion-icon slot="start" name="images-outline"></ion-icon>
+      Pick from gallery
+    </ion-button>
+  </div>
+
+  <ion-text color="danger" *ngIf="error">
+    <p class="error">{{ error }}</p>
+  </ion-text>
+
+  <div class="preview" *ngIf="photoUrl">
+    <img [src]="photoUrl" alt="Captured photo" />
+    <ion-button fill="clear" color="medium" (click)="clear()">Clear</ion-button>
+  </div>
+</ion-content>

@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Charts</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="regenerate()" aria-label="Regenerate data">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="chart-card">
+    <h3>Bar chart</h3>
+    <div class="chart-box">
+      <canvas #barCanvas></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <h3>Line chart</h3>
+    <div class="chart-box">
+      <canvas #lineCanvas></canvas>
+    </div>
+  </div>
+</ion-content>

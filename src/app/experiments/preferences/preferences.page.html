@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Preferences</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="save()" class="form">
+    <ion-item>
+      <ion-input
+        label="Key"
+        labelPlacement="stacked"
+        placeholder="e.g. username"
+        [(ngModel)]="key"
+        name="key"
+      ></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input
+        label="Value"
+        labelPlacement="stacked"
+        placeholder="Any string"
+        [(ngModel)]="value"
+        name="value"
+      ></ion-input>
+    </ion-item>
+    <ion-button type="submit" expand="block" [disabled]="!key.trim()">
+      Save
+    </ion-button>
+  </form>
+
+  <div class="list-header">
+    <h2>Stored ({{ entries.length }})</h2>
+    <ion-button
+      size="small"
+      fill="outline"
+      color="danger"
+      (click)="clearAll()"
+      [disabled]="entries.length === 0"
+    >
+      Clear all
+    </ion-button>
+  </div>
+
+  <ion-list *ngIf="entries.length; else empty">
+    <ion-item-sliding *ngFor="let e of entries">
+      <ion-item>
+        <ion-label>
+          <h3>{{ e.key }}</h3>
+          <p>{{ e.value }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="remove(e.key)">Delete</ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <ng-template #empty>
+    <ion-text color="medium">
+      <p class="empty">No entries yet.</p>
+    </ion-text>
+  </ng-template>
+</ion-content>
