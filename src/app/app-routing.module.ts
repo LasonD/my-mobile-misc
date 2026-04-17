@@ -2,7 +2,12 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'game', pathMatch: 'full' },
+  { path: '', redirectTo: 'dasha', pathMatch: 'full' },
+  {
+    path: 'dasha',
+    loadChildren: () =>
+      import('./experiments/dasha/dasha.module').then((m) => m.DashaPageModule),
+  },
   {
     path: 'game',
     loadChildren: () =>
