@@ -14,6 +14,7 @@ export interface Experiment {
 })
 export class AppComponent {
   readonly experiments: Experiment[] = [
+    { path: '/game', label: 'Drone Strike', icon: 'game-controller-outline' },
     { path: '/camera', label: 'Camera', icon: 'camera-outline' },
     { path: '/preferences', label: 'Preferences', icon: 'save-outline' },
     { path: '/charts', label: 'Charts', icon: 'bar-chart-outline' },
