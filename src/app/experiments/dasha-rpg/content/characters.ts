@@ -22,7 +22,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F3EB}', ring: 0xb56a8c, bg: 0xf6e4ec }), // 👩‍🏫
     voice: { lang: 'uk-UA', pitch: 1.05, rate: 1.05, volume: 1.0 },
-    bio: 'Викладачка КШЕ, з якою у Даши тісний контакт. Керівниця в кількох спільних статтях; Даша часто допомагає з організацією подій і презентацій.',
+    bio: 'Викладачка КШЕ, з якою у Даші тісний контакт. Керівниця в кількох спільних статтях; Даша часто допомагає з організацією подій і презентацій.',
   },
   yasya: {
     id: 'yasya',
@@ -31,7 +31,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F393}', ring: 0xe28a4a, bg: 0xfceedc }), // 👩‍🎓
     voice: { lang: 'uk-UA', pitch: 1.0, rate: 0.98, volume: 1.0 },
-    bio: 'Подруга Даши, ~30 років, психологія КШЕ (старший курс). Колись Даша була її баді на першому курсі — вводила в курс справ. Тепер Яся повертає послугу.',
+    bio: 'Подруга Даші, ~30 років, психологія КШЕ (старший курс). Колись Даша була її баді на першому курсі — вводила в курс справ. Тепер Яся повертає послугу.',
   },
   olesia: {
     id: 'olesia',
@@ -58,7 +58,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F527}', ring: 0x3d4a5c, bg: 0xe5e9ef }), // 👨‍🔧
     voice: { lang: 'uk-UA', pitch: 0.85, rate: 1.0, volume: 1.0 },
-    bio: 'Хлопець Даши. Живе аж в Обухові. Чорний Golf універсал, дизель.',
+    bio: 'Хлопець Даші. Живе аж в Обухові. Чорний Golf універсал, дизель.',
   },
   max_cat: {
     id: 'max_cat',
@@ -103,7 +103,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F3EB}', ring: 0x4a6b8c, bg: 0xe8eff5 }), // 👨‍🏫
     voice: { lang: 'uk-UA', pitch: 0.9, rate: 1.0, volume: 1.0 },
-    bio: 'Викладач, співавтор Даши по дослідженню про сексуальну реабілітацію ветеранів. Ідеолог "давай ти все напишеш, я підпишу".',
+    bio: 'Викладач, співавтор Даші по дослідженню про сексуальну реабілітацію ветеранів. Ідеолог "давай ти все напишеш, я підпишу".',
   },
   security: {
     id: 'security',

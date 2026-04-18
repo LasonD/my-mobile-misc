@@ -86,10 +86,12 @@ export class TitleScene extends Phaser.Scene {
   private drawTitle(narrow: boolean) {
     const { width, height } = this.scale;
     const cx = width / 2;
-    const y = height * (narrow ? 0.08 : 0.1);
+    // Leave clear air above the title so the "Знайомі" pill in the corner
+    // doesn't crowd it. ~72px of header space before the title starts.
+    const y = Math.max(72, height * (narrow ? 0.15 : 0.16));
 
     const title = this.add
-      .text(cx, y, 'Пригоди Даши', {
+      .text(cx, y, 'Пригоди Даші', {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '44px' : '58px',
         color: '#ffd36a',

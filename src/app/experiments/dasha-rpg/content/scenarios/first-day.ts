@@ -2,7 +2,7 @@ import { fx } from '../../engine/evaluators';
 import { Scenario } from '../../engine/types';
 
 /**
- * Перший день Даши в КШЕ на факультеті психології.
+ * Перший день Даші в КШЕ на факультеті психології.
  * Демонструє: зміну локацій, вибори з наслідками, квест з етапами,
  * персонажів із різними емоціями, відсилки до реальних фактів про КШЕ
  * (Милованов, Брік, Case Champ, "Що? Де? Коли?", Houston MA).
@@ -19,7 +19,7 @@ export const FIRST_DAY: Scenario = {
       onEnter: [fx.startQuest('first_day'), fx.setStat('charisma', 5), fx.setStat('stress', 2)],
       dialogue: [
         { speaker: 'narrator', text: '8:42 ранку. Київ. Вул. Шпака, 3.' },
-        { speaker: 'narrator', text: 'Перший день Даши на факультеті психології КШЕ.' },
+        { speaker: 'narrator', text: 'Перший день Даші на факультеті психології КШЕ.' },
         { speaker: 'dasha', text: 'Добре. Глибокий вдих. Я готова.' },
         { speaker: 'dasha', text: '(справді готова? 87 джерел у курсовій не допоможуть, якщо я заблукаю в коридорі)' },
       ],
