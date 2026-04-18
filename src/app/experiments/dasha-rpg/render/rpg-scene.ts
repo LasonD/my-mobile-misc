@@ -7,6 +7,7 @@ import { getLocation } from '../content/locations';
 import { getQuest } from '../content/quests';
 import { getScenario } from '../content/scenarios/index';
 import { StoryEngine } from '../engine/story-engine';
+import { AmbientPlayer, preloadAudio } from './audio-manager';
 import { SaveManager } from './save-manager';
 import {
   CharacterId,
@@ -34,6 +35,7 @@ export class RpgScene extends Phaser.Scene {
   private engine!: StoryEngine;
   private sfx = new SoftSounds();
   private voice = new Voice();
+  private ambient?: AmbientPlayer;
 
   // Current location
   private locationId: LocationId | null = null;
@@ -65,8 +67,14 @@ export class RpgScene extends Phaser.Scene {
     super('rpg');
   }
 
+  preload() {
+    preloadAudio(this);
+  }
+
   create(data: { scenarioId?: string; load?: boolean } = {}) {
     buildDashaTextures(this);
+
+    this.ambient = new AmbientPlayer(this);
 
     this.drawBaseBackground();
     this.buildDialogueUi();
@@ -86,6 +94,7 @@ export class RpgScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       this.sfx.dispose();
       this.voice.cancel();
+      this.ambient?.dispose();
       this.typewriterTimer?.remove();
       this.scale.off('resize', this.onResize, this);
     });
@@ -179,6 +188,9 @@ export class RpgScene extends Phaser.Scene {
 
     const oldLocation = this.locationObject;
     this.locationId = newId;
+
+    // Cross-fade the ambient loop to match the new scenery.
+    this.ambient?.playForLocation(newId);
 
     // Fade out characters briefly so they don't pop above new bg
     this.stage.forEach((o) => this.fadeOut(o as Phaser.GameObjects.Container));

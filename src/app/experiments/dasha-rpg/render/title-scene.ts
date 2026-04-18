@@ -7,6 +7,7 @@ import { TITLE_FACTS } from '../content/facts';
 import { UPCOMING, listScenarios } from '../content/scenarios/index';
 import { evaluate } from '../engine/evaluators';
 import { GameState } from '../engine/types';
+import { AmbientPlayer, playTitleTheme, preloadAudio } from './audio-manager';
 import { SaveManager } from './save-manager';
 
 const FACT_INTERVAL_MS = 11000;
@@ -17,9 +18,14 @@ export class TitleScene extends Phaser.Scene {
   private factTimer?: Phaser.Time.TimerEvent;
   private factOrder: number[] = [];
   private factCursor = 0;
+  private themePlayer?: AmbientPlayer;
 
   constructor() {
     super('title');
+  }
+
+  preload() {
+    preloadAudio(this);
   }
 
   create() {
@@ -39,10 +45,16 @@ export class TitleScene extends Phaser.Scene {
     this.drawDirectoryButton(state);
     this.drawFactTicker();
 
-    this.input.once('pointerdown', () => this.sfx.resume());
+    // Browsers block autoplay until the user interacts — kick off the
+    // title-theme fade-in on the first tap alongside the SFX unlock.
+    this.input.once('pointerdown', () => {
+      this.sfx.resume();
+      this.themePlayer = playTitleTheme(this);
+    });
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => {
       this.sfx.dispose();
+      this.themePlayer?.dispose();
       this.factTimer?.remove();
       this.scale.off('resize', this.onResize, this);
     });
