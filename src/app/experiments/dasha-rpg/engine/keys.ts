@@ -9,12 +9,19 @@
  */
 
 export const FLAGS = {
+  // first_day
   POSTED_SELFIE: 'posted_selfie',
   SAID_PSYCHOLOGY: 'said_psychology',
   BOLD_INTRO: 'bold_intro',
   TEAMED_WITH_YASYA: 'teamed_with_yasya',
   COFFEE_FIRST: 'coffee_first',
   PUBLIC_SEX_CLAIM: 'public_sex_claim',
+
+  // second_saturday — Act 1
+  DOOR_HIT_IN_DARK: 'door_hit_in_dark',
+  SATURDAY_LAUNDRY_RAN: 'saturday_laundry_ran',
+  SATURDAY_LAUNDRY_WAITED: 'saturday_laundry_waited',
+  SATURDAY_LAUNDRY_HANDWASH: 'saturday_laundry_handwash',
 } as const;
 
 export const STATS = {

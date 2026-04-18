@@ -1,7 +1,8 @@
 import { cond } from '../../engine/evaluators';
-import { QUESTS } from '../../engine/keys';
+import { FLAGS, QUESTS } from '../../engine/keys';
 import { Scenario, ScenarioId, ScenarioMeta, ScenarioRegistration } from '../../engine/types';
 import { FIRST_DAY } from './first-day';
+import { SECOND_SATURDAY } from './second-saturday';
 
 /**
  * Scenario registry. Each scenario is a graph of nodes; metadata describes how
@@ -28,15 +29,27 @@ export const SCENARIOS: Record<ScenarioId, ScenarioRegistration> = {
       done: cond.questDone(QUESTS.FIRST_DAY),
     },
   },
+  [SECOND_SATURDAY.id]: {
+    scenario: SECOND_SATURDAY,
+    meta: {
+      order: 2,
+      description: 'Субота, 8:15. Ліза спить, Олеся на обміні. Акт 1 готовий — ранок у квартирі.',
+      icon: '\u{1F3E0}', // 🏠 (house)
+      unlock: cond.questDone(QUESTS.FIRST_DAY),
+      // Тимчасово: вважаємо сценарій пройденим, якщо гравець дійшов до
+      // кінця Акту 1 (тобто зробив вибір про пральну машину). Буде замінено
+      // на справжній "scenario done" flag, коли Акти 2-3 будуть готові.
+      done: cond.any(
+        cond.flag(FLAGS.SATURDAY_LAUNDRY_RAN),
+        cond.flag(FLAGS.SATURDAY_LAUNDRY_WAITED),
+        cond.flag(FLAGS.SATURDAY_LAUNDRY_HANDWASH),
+      ),
+    },
+  },
 };
 
 /** Placeholder entries for upcoming chapters — show as locked. */
 export const UPCOMING: ScenarioMeta[] = [
-  {
-    order: 2,
-    description: 'Ранок у квартирі з Олесею та Лізою. До першої пари.',
-    icon: '\u2615', // ☕
-  },
   {
     order: 3,
     description: 'Вихідні в Обухові. Саша, Golf, кіт Макс.',

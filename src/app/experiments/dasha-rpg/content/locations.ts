@@ -461,6 +461,195 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       return container;
     },
   },
+
+  apartment_hallway_dark: {
+    id: 'apartment_hallway_dark',
+    name: 'Коридор (ранок)',
+    tint: 0xc8c0d4,
+    build: (scene) => {
+      const { width, height } = scene.scale;
+      const container = scene.add.container(0, 0);
+      // Deep pre-dawn blue-violet — hallway with no direct window light.
+      container.add(gradientBg(scene, 0x181226, 0x201834, 0x2a1f40, 0x1e1630));
+
+      // Bathroom door, ajar. A narrow vertical strip of slightly warmer tone
+      // suggests the doorway; the door itself is a rectangle tilted a few
+      // degrees open. Placed off-center so Dasha (center) can "collide" with it.
+      const doorFrameX = width * 0.62;
+      const doorFrameY = height * 0.18;
+      const doorFrameW = width * 0.14;
+      const doorFrameH = height * 0.56;
+
+      // Frame (slightly lighter than wall).
+      const frame = scene.add.graphics();
+      frame.fillStyle(0x2e2238, 1);
+      frame.fillRect(doorFrameX - 3, doorFrameY, doorFrameW + 6, doorFrameH);
+      container.add(frame);
+
+      // Doorway interior — faint cool light leaking out (moonlight through
+      // the bathroom window, say). Thin sliver since door is only ajar.
+      const interior = scene.add.graphics();
+      interior.fillStyle(0x3a3050, 1);
+      interior.fillRect(doorFrameX + 2, doorFrameY + 4, doorFrameW - 4, doorFrameH - 8);
+      container.add(interior);
+
+      // The door itself — rotated slightly to look ajar. Anchor at the hinge.
+      const door = scene.add.rectangle(
+        doorFrameX + doorFrameW - 4,
+        doorFrameY + doorFrameH / 2,
+        doorFrameW - 6,
+        doorFrameH - 10,
+        0x4a3855
+      );
+      door.setOrigin(1, 0.5);
+      door.setAngle(-22);
+      container.add(door);
+
+      // Tiny handle highlight.
+      const handle = scene.add.circle(
+        doorFrameX + 8,
+        doorFrameY + doorFrameH / 2,
+        2,
+        0xc8b8d8
+      );
+      container.add(handle);
+
+      // Floor — darker than wall, slight gradient to edge.
+      addFloor(scene, container, 0x120b1c, height * 0.82);
+
+      // Very occasional slow dust mote — the apartment is still, but air drifts.
+      const dustLayer = scene.add.container(0, 0);
+      container.add(dustLayer);
+      scheduleRecurring(scene, dustLayer, {
+        minMs: 1800,
+        maxMs: 4000,
+        fn: () =>
+          spawnDustMote(scene, dustLayer, {
+            x: Phaser.Math.Between(width * 0.1, width * 0.9),
+            y: Phaser.Math.Between(height * 0.2, height * 0.7),
+            tint: 0x8a80a0,
+          }),
+      });
+
+      return container;
+    },
+  },
+
+  apartment_kitchen: {
+    id: 'apartment_kitchen',
+    name: 'Кухня',
+    tint: 0xfff4d8,
+    build: (scene) => {
+      const { width, height } = scene.scale;
+      const container = scene.add.container(0, 0);
+      // Morning kitchen — pale lavender sky above, warm yellow interior below.
+      container.add(gradientBg(scene, 0xa8b0d8, 0xb8a8c8, 0xf0d8a0, 0xe8c080));
+
+      // Window on the left, letting in pale dawn light.
+      const winX = width * 0.08;
+      const winY = height * 0.15;
+      const winW = width * 0.28;
+      const winH = height * 0.32;
+
+      const winFrame = scene.add.graphics();
+      winFrame.fillStyle(0xc8d4e8, 1);
+      winFrame.fillRect(winX, winY, winW, winH);
+      winFrame.lineStyle(3, 0x7a6a4a, 1);
+      winFrame.strokeRect(winX, winY, winW, winH);
+      // Cross bars.
+      winFrame.beginPath();
+      winFrame.moveTo(winX + winW / 2, winY);
+      winFrame.lineTo(winX + winW / 2, winY + winH);
+      winFrame.moveTo(winX, winY + winH / 2);
+      winFrame.lineTo(winX + winW, winY + winH / 2);
+      winFrame.strokePath();
+      container.add(winFrame);
+
+      // Counter running across the bottom half.
+      const counterY = height * 0.52;
+      const counter = scene.add.graphics();
+      counter.fillStyle(0x6a4a2e, 1);
+      counter.fillRoundedRect(0, counterY, width, 24, 4);
+      // Counter top surface, slightly lighter.
+      counter.fillStyle(0x8a6a4e, 1);
+      counter.fillRoundedRect(0, counterY, width, 6, 4);
+      container.add(counter);
+
+      // Sink (dark inset in counter).
+      const sinkX = width * 0.55;
+      const sinkW = width * 0.18;
+      const sink = scene.add.graphics();
+      sink.fillStyle(0x3a3028, 1);
+      sink.fillRoundedRect(sinkX, counterY + 3, sinkW, 16, 3);
+      container.add(sink);
+
+      // Kettle on the counter, slightly left of center. Small round shape.
+      const kettleX = width * 0.38;
+      const kettleY = counterY - 18;
+      const kettleBody = scene.add.circle(kettleX, kettleY, 14, 0x2a1f28);
+      const kettleSpout = scene.add.triangle(
+        kettleX - 14,
+        kettleY - 2,
+        0,
+        0,
+        -8,
+        -4,
+        0,
+        6,
+        0x2a1f28
+      );
+      const kettleHandle = scene.add.circle(kettleX + 12, kettleY - 6, 4, 0x2a1f28);
+      container.add([kettleBody, kettleSpout, kettleHandle]);
+
+      // Subtle warm light glowing from under the kettle (electric base).
+      const base = scene.add.circle(kettleX, kettleY + 13, 12, 0xffcf66, 0.35);
+      container.add(base);
+
+      // Wall cabinet above the sink.
+      const cab = scene.add.graphics();
+      cab.fillStyle(0x8a6a4a, 1);
+      cab.fillRoundedRect(sinkX - 4, height * 0.22, sinkW + 8, height * 0.22, 4);
+      cab.lineStyle(2, 0x5a3e28, 1);
+      cab.strokeRoundedRect(sinkX - 4, height * 0.22, sinkW + 8, height * 0.22, 4);
+      // Two cabinet doors — vertical line down the middle.
+      cab.beginPath();
+      cab.moveTo(sinkX - 4 + (sinkW + 8) / 2, height * 0.22);
+      cab.lineTo(sinkX - 4 + (sinkW + 8) / 2, height * 0.44);
+      cab.strokePath();
+      container.add(cab);
+
+      // Floor.
+      addFloor(scene, container, 0x9a7a5a, height * 0.78);
+
+      // Slow steam puffs from the kettle.
+      const steamLayer = scene.add.container(0, 0);
+      container.add(steamLayer);
+      scheduleRecurring(scene, steamLayer, {
+        minMs: 900,
+        maxMs: 1800,
+        fn: () =>
+          spawnSteamPuff(scene, steamLayer, {
+            x: kettleX - 14,
+            y: kettleY - 6,
+          }),
+      });
+
+      // Very sparse bird silhouettes past the window at distant frequency.
+      const birdLayer = scene.add.container(0, 0);
+      container.add(birdLayer);
+      scheduleRecurring(scene, birdLayer, {
+        minMs: 4000,
+        maxMs: 9000,
+        fn: () =>
+          spawnBird(scene, birdLayer, {
+            y: Phaser.Math.Between(winY + 8, winY + winH - 16),
+            alpha: 0.35,
+          }),
+      });
+
+      return container;
+    },
+  },
 };
 
 export function getLocation(id: LocationId): LocationDef | null {
