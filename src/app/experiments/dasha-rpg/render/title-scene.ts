@@ -191,8 +191,8 @@ export class TitleScene extends Phaser.Scene {
       });
     }
 
-    // Upcoming placeholders
-    for (const meta of UPCOMING) {
+    // Upcoming placeholders — show only the first two to save vertical space.
+    for (const meta of UPCOMING.slice(0, 2)) {
       entries.push({
         kind: 'upcoming',
         title: 'Незабаром',
@@ -203,14 +203,18 @@ export class TitleScene extends Phaser.Scene {
       });
     }
 
+    const gap = 10;
     const maxCount = Math.max(entries.length, 1);
-    const totalGap = 10;
-    const cardH = Math.min(76, Math.floor((listHeight - totalGap * (maxCount - 1)) / maxCount));
+    const cardH = Phaser.Math.Clamp(
+      Math.floor((listHeight - gap * (maxCount - 1)) / maxCount),
+      60,
+      86
+    );
     const cardW = Math.min(width - 32, 440);
     const startX = (width - cardW) / 2;
 
     entries.forEach((entry, i) => {
-      const y = listTop + i * (cardH + totalGap);
+      const y = listTop + i * (cardH + gap);
       this.renderLevelCard(startX, y, cardW, cardH, entry);
     });
   }
@@ -226,34 +230,40 @@ export class TitleScene extends Phaser.Scene {
     bg.lineStyle(2, color, dim ? 0.5 : 1);
     bg.strokeRoundedRect(x, y, w, h, 12);
 
-    const iconBg = this.add.circle(x + 32, y + h / 2, 20, 0x1a1428, 0.7);
+    // Icon at fixed vertical midpoint
+    const iconBg = this.add.circle(x + 30, y + h / 2, 18, 0x1a1428, 0.7);
     iconBg.setStrokeStyle(1, color, dim ? 0.5 : 1);
     this.add
-      .text(x + 32, y + h / 2, entry.icon, {
+      .text(x + 30, y + h / 2, entry.icon, {
         fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-        fontSize: '22px',
+        fontSize: '20px',
       })
       .setOrigin(0.5);
 
-    this.add.text(x + 60, y + 10, entry.title, {
+    // Title at top of card
+    this.add.text(x + 58, y + 10, entry.title, {
       fontFamily: 'Georgia, serif',
-      fontSize: '17px',
+      fontSize: '16px',
       color: dim ? '#8a7a9e' : '#fdf6f3',
       fontStyle: 'bold',
     });
-    this.add.text(x + 60, y + h - 28, entry.description, {
+
+    // Description flows below title; small font so 2 lines fit in 86px card
+    this.add.text(x + 58, y + 32, entry.description, {
       fontFamily: 'Georgia, serif',
-      fontSize: '12px',
+      fontSize: '11px',
       color: dim ? '#5e5373' : '#baa6d4',
       fontStyle: 'italic',
       wordWrap: { width: w - 80 },
+      lineSpacing: 2,
     });
 
-    const badge = entry.status === 'completed' ? '✓' : entry.status === 'locked' ? '🔒' : '▶';
+    // Status badge on the right
+    const badge = entry.status === 'completed' ? '\u2713' : entry.status === 'locked' ? '\u{1F512}' : '\u25B6';
     this.add
-      .text(x + w - 16, y + h / 2, badge, {
-        fontFamily: 'Georgia, serif',
-        fontSize: '18px',
+      .text(x + w - 14, y + h / 2, badge, {
+        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
+        fontSize: '16px',
         color: dim ? '#5e5373' : '#fdf6f3',
       })
       .setOrigin(1, 0.5);
