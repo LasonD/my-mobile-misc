@@ -194,8 +194,10 @@ export class TitleScene extends Phaser.Scene {
     // Registered scenarios
     for (const reg of listScenarios()) {
       const done = this.isScenarioDone(state, reg.scenario.id);
-      const locked = reg.meta.unlock && state
-        ? !evaluate(reg.meta.unlock, state)
+      // If the scenario has an unlock gate, evaluate it. No save state means
+      // no progress — the gate fails and the scenario stays locked.
+      const locked = reg.meta.unlock
+        ? !state || !evaluate(reg.meta.unlock, state)
         : false;
       entries.push({
         kind: 'scenario',

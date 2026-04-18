@@ -1,8 +1,9 @@
-import { cond } from '../../engine/evaluators';
 import { FLAGS, QUESTS } from '../../engine/keys';
 import { Scenario, ScenarioId, ScenarioMeta, ScenarioRegistration } from '../../engine/types';
+
 import { FIRST_DAY } from './first-day';
 import { SECOND_SATURDAY } from './second-saturday';
+import { cond } from '../../engine/evaluators';
 
 /**
  * Scenario registry. Each scenario is a graph of nodes; metadata describes how
@@ -50,8 +51,8 @@ export const UPCOMING: ScenarioMeta[] = [
   },
   {
     order: 4,
-    description: '«Що? Де? Коли?» — економічна версія. Перший вихід на сцену.',
-    icon: '\u{1F3C6}', // 🏆
+    description: 'Похід на пиво. Даша знайомить Сашу з клубом «Настолки під час війни» — Артем, Соня, Паша з його BMW та інші.',
+    icon: '\u{1F37A}', // 🍺
   },
 ];
 
