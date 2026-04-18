@@ -72,6 +72,18 @@ export class RpgScene extends Phaser.Scene {
   }
 
   create(data: { scenarioId?: string; load?: boolean } = {}) {
+    // Phaser re-uses the same scene instance across `scene.start` calls, so
+    // class fields persist. Reset anything that tracks GameObjects or scene
+    // state — otherwise stale refs make `onLocationChanged` / `onCharactersChanged`
+    // skip re-rendering after a reset.
+    this.locationId = null;
+    this.locationObject = null;
+    this.stage = new Map();
+    this.dialogBoxH = 120;
+    this.typedChars = 0;
+    this.currentFullText = '';
+    this.typewriterDone = true;
+
     buildDashaTextures(this);
 
     this.ambient = new AmbientPlayer(this);
