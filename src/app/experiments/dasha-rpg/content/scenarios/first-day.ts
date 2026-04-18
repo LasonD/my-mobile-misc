@@ -9,7 +9,7 @@ import { Scenario } from '../../engine/types';
  */
 export const FIRST_DAY: Scenario = {
   id: 'first_day',
-  title: 'Перший день у КШЕ',
+  title: 'Пролог · Як усе почалось',
   startNode: 'arrival',
   nodes: {
     // ---- Entrance ----
@@ -18,6 +18,7 @@ export const FIRST_DAY: Scenario = {
       characters: [{ id: 'dasha', position: 'center' }],
       onEnter: [fx.startQuest('first_day'), fx.setStat('charisma', 5), fx.setStat('stress', 2)],
       dialogue: [
+        { speaker: 'narrator', text: '*Спогад. Два роки тому.*' },
         { speaker: 'narrator', text: '8:42 ранку. Київ. Вул. Шпака, 3.' },
         { speaker: 'narrator', text: 'Перший день Даші на факультеті психології КШЕ.' },
         { speaker: 'dasha', text: 'Добре. Глибокий вдих. Я готова.' },

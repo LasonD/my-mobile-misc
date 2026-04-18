@@ -114,7 +114,7 @@ export class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     const sub = this.add
-      .text(cx, y + title.height * 0.7, 'Глава 1 · Перший курс', {
+      .text(cx, y + title.height * 0.7, '3 курс психології · КШЕ', {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '16px' : '20px',
         color: '#cdb4db',

@@ -22,8 +22,8 @@ export const SCENARIOS: Record<ScenarioId, ScenarioRegistration> = {
     scenario: FIRST_DAY,
     meta: {
       order: 1,
-      description: 'Перший курс, 8:42, вул. Шпака, 3. Перші вибори.',
-      icon: '\u{1F393}', // 🎓
+      description: 'Спогад про перший день у КШЕ. Два роки тому, 8:42, вул. Шпака, 3.',
+      icon: '\u{1F4D6}', // 📖 (book — flashback)
       done: cond.questDone('first_day'),
     },
   },
