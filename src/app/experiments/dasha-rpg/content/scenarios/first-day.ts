@@ -113,7 +113,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'dasha', text: 'Дякую!' },
       ],
       onExit: [fx.objective('first_day', 'pass_security')],
-      next: 'lobby_valeria',
+      next: 'lobby_yasya',
     },
 
     security_sex: {
@@ -130,7 +130,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'security', text: 'Третій поверх. Ліфт праворуч.' },
       ],
       onExit: [fx.objective('first_day', 'pass_security'), fx.stat('reputation', 1)],
-      next: 'lobby_valeria',
+      next: 'lobby_yasya',
     },
 
     security_maybe: {
@@ -146,39 +146,39 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'security', text: 'Третій поверх.' },
       ],
       onExit: [fx.objective('first_day', 'pass_security')],
-      next: 'lobby_valeria',
+      next: 'lobby_yasya',
     },
 
-    // ---- Meet Valeria ----
-    lobby_valeria: {
+    // ---- Meet Yasya ----
+    lobby_yasya: {
       location: 'kse_lobby',
       characters: [
         { id: 'dasha', position: 'left' },
-        { id: 'valeria', position: 'right' },
+        { id: 'yasya', position: 'right' },
       ],
       dialogue: [
         { speaker: 'narrator', text: 'Біля рецепції — знайоме обличчя.' },
-        { speaker: 'valeria', text: 'ДАША! Дашенька, я тут!' },
-        { speaker: 'dasha', text: 'Валерія! Я думала, ти на презентації в спортклубі.' },
-        { speaker: 'valeria', text: 'Була. Вирішила, що замість баскетболу піду на курс з крос-культурної психології. Логіка.' },
-        { speaker: 'dasha', text: 'Класична Палій-логіка.' },
-        { speaker: 'valeria', text: 'Слухай, я чула, що сьогодні сам Милованов має виступати з привітальним словом.' },
-        { speaker: 'valeria', text: 'І ректор Брік теж. Економіст + соціолог в одному кадрі. Історія.' },
+        { speaker: 'yasya', text: 'Дашка! Ну хто прийшла зустрічати першокурсницю? Я.' },
+        { speaker: 'dasha', text: 'Яся! Ти ж мала бути в семінарі?' },
+        { speaker: 'yasya', text: 'Семінар почекає. Ти колись водила мене сюди по коридорах. Тепер моя черга.' },
+        { speaker: 'dasha', text: '*обнімає* Дякую. Серйозно. Я думала, що буду одна.' },
+        { speaker: 'yasya', text: 'Ні. Сьогодні в тебе є старша подруга з картою КШЕ в голові.' },
+        { speaker: 'yasya', text: 'До речі — Милованов нібито виступатиме з привітальним словом. І Брік теж.' },
       ],
-      onEnter: [fx.objective('first_day', 'meet_valeria')],
+      onEnter: [fx.objective('first_day', 'meet_yasya')],
       choices: [
         {
-          text: '"Круто. Пішли шукати аудиторію."',
+          text: '"Покажи мені аудиторію 301."',
           next: 'heading_to_lecture',
-          effects: [fx.flag('teamed_with_valeria')],
+          effects: [fx.flag('teamed_with_yasya')],
         },
         {
-          text: '"А що на дошці оголошень?"',
+          text: '"А що там на дошці оголошень?"',
           next: 'notice_board',
-          hint: 'Є квест-хук про Case Champ',
+          hint: 'Дашу тягне до Case Champ-у',
         },
         {
-          text: '"Спочатку кава?"',
+          text: '"Кава перед першою парою?"',
           next: 'cafe_break_early',
           effects: [fx.stat('stress', -1), fx.flag('coffee_first')],
         },
@@ -189,14 +189,14 @@ export const FIRST_DAY: Scenario = {
       location: 'kse_lobby',
       characters: [
         { id: 'dasha', position: 'left' },
-        { id: 'valeria', position: 'right' },
+        { id: 'yasya', position: 'right' },
       ],
       dialogue: [
         { speaker: 'narrator', text: 'На стенді — три оголошення:' },
         { speaker: 'narrator', text: '▸ Case Champ 2026 — реєстрація відкрита.' },
         { speaker: 'narrator', text: '▸ "Що? Де? Коли?" — економічна версія, щочетверга.' },
         { speaker: 'narrator', text: '▸ Волейбольний клуб шукає гравців. Шапка з логотипом у подарунок.' },
-        { speaker: 'valeria', text: 'Нам треба на Case Champ. Це +стипендія й лінія в резюме.' },
+        { speaker: 'yasya', text: 'Case Champ — це +стипендія й лінія в резюме. Я в минулому році дійшла до півфіналу.' },
         { speaker: 'dasha', text: 'Я б у ЩДК пішла. Але спершу виживемо до кінця дня.' },
       ],
       next: 'heading_to_lecture',
@@ -206,12 +206,13 @@ export const FIRST_DAY: Scenario = {
       location: 'cafeteria',
       characters: [
         { id: 'dasha', position: 'left' },
-        { id: 'valeria', position: 'right' },
+        { id: 'yasya', position: 'right' },
       ],
       dialogue: [
-        { speaker: 'valeria', text: 'Еспресо. Подвійне.' },
+        { speaker: 'yasya', text: 'Бариста знає мене краще, ніж декан. Замовляю — лате з вівсяним. Тобі — таке ж?' },
         { speaker: 'dasha', text: 'Лате. І печиво. Я нервую.' },
         { speaker: 'narrator', text: 'У кафе вже черга з 10 людей. Усі — першокурсники. Усі нервують.' },
+        { speaker: 'yasya', text: 'Перший день — це наче перший раз у спортзалі. Ноги тремтять, але потім звикаєш.' },
         { speaker: 'dasha', text: 'Чомусь від цього трохи легше.' },
       ],
       next: 'heading_to_lecture',
@@ -221,14 +222,18 @@ export const FIRST_DAY: Scenario = {
     heading_to_lecture: {
       location: 'lecture_hall',
       characters: [
-        { id: 'dasha', position: 'left' },
-        { id: 'valeria', position: 'center' },
+        { id: 'dasha', position: 'center' },
+        { id: 'yasya', position: 'left' },
       ],
       dialogue: [
-        { speaker: 'narrator', text: 'Аудиторія 301. Порожньо тільки перші п\'ять хвилин.' },
-        { speaker: 'narrator', text: 'Далі — повна зала. На дошці вже виведена формула корисності.' },
-        { speaker: 'valeria', text: 'Навіщо нам функція корисності на психології?' },
-        { speaker: 'dasha', text: 'У КШЕ все пов\'язане. Навіть сни.' },
+        { speaker: 'yasya', text: 'Ось вона — 301. Я тебе тут лишаю, у мене своя пара на 4-му.' },
+        { speaker: 'yasya', text: 'Не панікуй. Коваленко жорстка, але справедлива. Скажеш правду — буде задоволена.' },
+        { speaker: 'dasha', text: 'А якщо я скажу "сексологія"?' },
+        { speaker: 'yasya', text: 'Тоді вона запам\'ятає тебе на всі чотири роки. Що, до речі, плюс.' },
+        { speaker: 'narrator', text: 'Яся махає рукою і зникає в коридорі.' },
+        { speaker: 'narrator', text: 'Аудиторія 301. Порожньо тільки перші п\'ять хвилин. Потім — повна зала.' },
+        { speaker: 'narrator', text: 'На дошці вже виведена формула корисності. Бо КШЕ.' },
+        { speaker: 'dasha', text: '(глибокий вдих)' },
       ],
       onEnter: [fx.objective('first_day', 'attend_lecture')],
       next: 'prof_entrance',
@@ -237,14 +242,13 @@ export const FIRST_DAY: Scenario = {
     prof_entrance: {
       location: 'lecture_hall',
       characters: [
-        { id: 'dasha', position: 'far-left' },
-        { id: 'valeria', position: 'left' },
+        { id: 'dasha', position: 'left' },
         { id: 'prof_psy', position: 'right' },
       ],
       dialogue: [
         { speaker: 'prof_psy', text: 'Доброго ранку. Я — Олена Коваленко. Курс: "Вступ до психологічної практики".' },
         { speaker: 'prof_psy', text: 'Перші 5 хвилин — знайомство. Кожен встає, називає ім\'я й напрям спеціалізації.' },
-        { speaker: 'valeria', text: '(шепоче) Я скажу "клінічна". Це безпечно.' },
+        { speaker: 'dasha', text: '(серце в горлі)' },
       ],
       choices: [
         {
@@ -259,10 +263,10 @@ export const FIRST_DAY: Scenario = {
           hint: 'Обережніший варіант',
         },
         {
-          text: 'Пропустити чергу, дати Валерії першою',
-          next: 'prof_val_first',
+          text: 'Пропустити чергу, дати іншим піти першими',
+          next: 'prof_wait',
           effects: [fx.stat('stress', 1)],
-          hint: 'Шпигнути в подругу',
+          hint: 'Виграти час, але потім зайти всіх ходом',
         },
       ],
     },
@@ -294,18 +298,17 @@ export const FIRST_DAY: Scenario = {
       next: 'day_end',
     },
 
-    prof_val_first: {
+    prof_wait: {
       location: 'lecture_hall',
       characters: [
-        { id: 'dasha', position: 'far-left' },
-        { id: 'valeria', position: 'left' },
+        { id: 'dasha', position: 'left' },
         { id: 'prof_psy', position: 'right' },
       ],
       dialogue: [
-        { speaker: 'valeria', text: 'Валерія. Клінічна. Поки що.' },
-        { speaker: 'prof_psy', text: 'Чудово.' },
-        { speaker: 'dasha', text: 'Даша. Психологія, спеціалізація визначається.' },
-        { speaker: 'prof_psy', text: 'У вас буде 4 роки на рішення.' },
+        { speaker: 'narrator', text: 'Шість одногрупників вже представились. Усі — "клінічна", "організаційна". Безпечно.' },
+        { speaker: 'prof_psy', text: 'Залишилась одна. Прошу.' },
+        { speaker: 'dasha', text: 'Даша. Психологія, спеціалізація — сексологія.' },
+        { speaker: 'prof_psy', text: 'Останньою — і одразу унікум. Прийнято.' },
       ],
       next: 'day_end',
     },
@@ -315,15 +318,19 @@ export const FIRST_DAY: Scenario = {
       location: 'cafeteria',
       characters: [
         { id: 'dasha', position: 'left' },
-        { id: 'valeria', position: 'right' },
+        { id: 'yasya', position: 'right' },
       ],
       onEnter: [fx.objective('first_day', 'survive_day'), fx.completeQuest('first_day')],
       dialogue: [
-        { speaker: 'narrator', text: '17:30. День завершився. Перше кафе. Обидві живі.' },
-        { speaker: 'valeria', text: 'Отже. Ти справді збираєшся стати відомою сексологинею?' },
+        { speaker: 'narrator', text: '17:30. День завершився. Перше кафе. Яся вже з лате.' },
+        { speaker: 'yasya', text: 'Ну? Жива?' },
+        { speaker: 'dasha', text: 'Жива. Коваленко мене запам\'ятала. Не впевнена, що в хорошому сенсі.' },
+        { speaker: 'yasya', text: 'У хорошому. У КШЕ "запам\'ятали" = "є на радарі". Це база.' },
+        { speaker: 'yasya', text: 'Отже. Ти справді збираєшся стати відомою сексологинею?' },
         { speaker: 'dasha', text: 'Збираюсь. Я ж не жартую.' },
-        { speaker: 'valeria', text: 'Я знаю. Просто хотіла ще раз почути. Для підтримки.' },
-        { speaker: 'dasha', text: 'Дякую.' },
+        { speaker: 'yasya', text: 'Знаю. Просто хотіла ще раз почути. Для підтримки.' },
+        { speaker: 'dasha', text: 'Дякую. За все.' },
+        { speaker: 'yasya', text: 'Тільки не звикай — у мене за тиждень два дедлайни і я зникну.' },
       ],
     },
   },

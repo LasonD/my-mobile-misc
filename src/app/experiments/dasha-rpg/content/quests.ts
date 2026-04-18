@@ -11,7 +11,7 @@ export const QUESTS: Record<QuestId, QuestDef> = {
     description: 'Познайомитись, не загубитись, вижити.',
     objectives: [
       { id: 'pass_security', description: 'Пройти охорону на вході' },
-      { id: 'meet_valeria', description: 'Знайти Валерію у лобі' },
+      { id: 'meet_yasya', description: 'Знайти Ясю в лобі' },
       { id: 'attend_lecture', description: 'Потрапити на першу лекцію' },
       { id: 'survive_day', description: 'Пережити перший день' },
     ],

@@ -17,12 +17,21 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   },
   valeria: {
     id: 'valeria',
-    name: 'Валерія',
-    color: 0xff85a2,
+    name: 'Валерія Палій',
+    color: 0xb56a8c,
     render: (scene) =>
-      renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F3A8}', ring: 0xff85a2, bg: 0xffeaf2 }), // 👩‍🎨
-    voice: { lang: 'uk-UA', pitch: 1.2, rate: 1.15, volume: 1.0 },
-    bio: 'Валерія Палій. Подруга Даши. Творчий хаос + енергія.',
+      renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F3EB}', ring: 0xb56a8c, bg: 0xf6e4ec }), // 👩‍🏫
+    voice: { lang: 'uk-UA', pitch: 1.05, rate: 1.05, volume: 1.0 },
+    bio: 'Викладачка КШЕ, з якою у Даши тісний контакт. Керівниця в кількох спільних статтях; Даша часто допомагає з організацією подій і презентацій.',
+  },
+  yasya: {
+    id: 'yasya',
+    name: 'Яся',
+    color: 0xe28a4a,
+    render: (scene) =>
+      renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F393}', ring: 0xe28a4a, bg: 0xfceedc }), // 👩‍🎓
+    voice: { lang: 'uk-UA', pitch: 1.0, rate: 0.98, volume: 1.0 },
+    bio: 'Подруга Даши, ~30 років, психологія КШЕ (старший курс). Колись Даша була її баді на першому курсі — вводила в курс справ. Тепер Яся повертає послугу.',
   },
   olesia: {
     id: 'olesia',
