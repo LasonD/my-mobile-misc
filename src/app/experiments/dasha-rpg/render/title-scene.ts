@@ -1,14 +1,15 @@
 import * as Phaser from 'phaser';
 
-import { buildDashaTextures } from '../../dasha/scenes/dasha-sprite';
-import { SoftSounds } from '../../dasha/scenes/soft-sounds';
-import { CHARACTERS } from '../content/characters';
-import { TITLE_FACTS } from '../content/facts';
-import { UPCOMING, listScenarios } from '../content/scenarios/index';
-import { evaluate } from '../engine/evaluators';
-import { GameState } from '../engine/types';
 import { AmbientPlayer, playTitleTheme, preloadAudio } from './audio-manager';
+import { UPCOMING, listScenarios } from '../content/scenarios/index';
+
+import { CHARACTERS } from '../content/characters';
+import { GameState } from '../engine/types';
 import { SaveManager } from './save-manager';
+import { SoftSounds } from '../../dasha/scenes/soft-sounds';
+import { TITLE_FACTS } from '../content/facts';
+import { buildDashaTextures } from '../../dasha/scenes/dasha-sprite';
+import { evaluate } from '../engine/evaluators';
 
 const FACT_INTERVAL_MS = 11000;
 
@@ -42,6 +43,7 @@ export class TitleScene extends Phaser.Scene {
     this.drawTitle(isNarrow);
     this.drawDasha(isNarrow);
     this.drawLevelSelect(state, isNarrow);
+    this.drawResetButton(state);
     this.drawDirectoryButton(state);
     this.drawFactTicker();
 
@@ -103,18 +105,18 @@ export class TitleScene extends Phaser.Scene {
     const y = Math.max(58, height * (narrow ? 0.11 : 0.12));
 
     const title = this.add
-      .text(cx, y, 'Пригоди Даші', {
+      .text(cx, y, 'Даша: як це було', {
         fontFamily: 'Georgia, serif',
-        fontSize: narrow ? '44px' : '58px',
+        fontSize: narrow ? '34px' : '45px',
         color: '#ffd36a',
-        fontStyle: 'bold',
+        fontStyle: 'italic bold',
         stroke: '#3a1a4a',
         strokeThickness: 5,
       })
       .setOrigin(0.5);
 
     const sub = this.add
-      .text(cx, y + title.height * 0.7, '3 курс психології · КШЕ', {
+      .text(cx, y + title.height * 0.7, 'Київ. Люди. Сексологія. І не тільки :)', {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '16px' : '20px',
         color: '#cdb4db',
@@ -376,6 +378,63 @@ export class TitleScene extends Phaser.Scene {
     const reg = listScenarios().find((r) => r.scenario.id === id);
     if (!reg?.meta.done) return false;
     return evaluate(reg.meta.done, state);
+  }
+
+  // ---------- Directory button ----------
+
+  private drawResetButton(state: GameState | null) {
+    const { width } = this.scale;
+
+    const padX = 12;
+    const padY = 6;
+    const txt = this.add
+      .text(0, 0, '🗑️ Скинути прогрес', {
+        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Georgia, serif',
+        fontSize: '13px',
+        color: 'red',
+        fontStyle: 'italic',
+      })
+      .setOrigin(0, 0)
+      .setDepth(50);
+
+    const bw = txt.width + padX * 2;
+    const bh = txt.height + padY * 2;
+    const x = width - bw - 220;
+    const y = 14;
+
+    const bg = this.add.graphics().setDepth(49);
+    bg.fillStyle(0x1a1428, 0.85);
+    bg.fillRoundedRect(x, y, bw, bh, 8);
+    bg.lineStyle(1.5, 0xcdb4db, 0.85);
+    bg.strokeRoundedRect(x, y, bw, bh, 8);
+
+    txt.setPosition(x + padX, y + padY);
+
+    const zone = this.add
+      .zone(x, y, bw, bh)
+      .setOrigin(0)
+      .setDepth(51)
+      .setInteractive({ useHandCursor: true });
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x3a2a4a, 0.95);
+      bg.fillRoundedRect(x, y, bw, bh, 8);
+      bg.lineStyle(1.5, 0xcdb4db, 1);
+      bg.strokeRoundedRect(x, y, bw, bh, 8);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x1a1428, 0.85);
+      bg.fillRoundedRect(x, y, bw, bh, 8);
+      bg.lineStyle(1.5, 0xcdb4db, 0.85);
+      bg.strokeRoundedRect(x, y, bw, bh, 8);
+    });
+    zone.on('pointerup', () => {
+      this.sfx.pop();
+      this.factTimer?.remove();
+      SaveManager.clear();
+      this.scene.start('title');
+    });
   }
 
   // ---------- Fact ticker ----------
