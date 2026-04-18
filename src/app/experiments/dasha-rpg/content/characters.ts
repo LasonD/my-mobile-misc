@@ -109,7 +109,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
         facialHair: 'stubble',
       }),
     voice: { lang: 'uk-UA', pitch: 0.85, rate: 1.0, volume: 1.0 },
-    hook: 'Хлопець. Обухов, Golf, Shorts & Reels. Ревную до Golf-а.',
+    hook: 'Хлопець. Обухів, Golf, Shorts & Reels. Ревную до Golf-а.',
     bio: 'Хлопець Даші, 23. Програміст. Живе в Обухові. Чорний Golf універсал, дизель — пробіг пам\'ятаю краще, ніж наші дати. Прокрастинує в Shorts і Reels, потім допрацьовує до ночі.',
   },
   max_cat: {
