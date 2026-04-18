@@ -22,6 +22,16 @@ export const FLAGS = {
   SATURDAY_LAUNDRY_RAN: 'saturday_laundry_ran',
   SATURDAY_LAUNDRY_WAITED: 'saturday_laundry_waited',
   SATURDAY_LAUNDRY_HANDWASH: 'saturday_laundry_handwash',
+
+  // second_saturday — Act 2
+  SATURDAY_APOLOGY: 'saturday_apology',
+  SATURDAY_PUSHBACK: 'saturday_pushback',
+  SATURDAY_DEFLECTED_JOKE: 'saturday_deflected_joke',
+  DOOR_TALK_DIRECT: 'door_talk_direct',
+  DOOR_TALK_DEFLECT: 'door_talk_deflect',
+  DOOR_TALK_SERIOUS: 'door_talk_serious',
+  LIZA_DOOR_REASON_KNOWN: 'liza_door_reason_known',
+  ACT2_DONE: 'second_saturday_act2_done',
 } as const;
 
 export const STATS = {

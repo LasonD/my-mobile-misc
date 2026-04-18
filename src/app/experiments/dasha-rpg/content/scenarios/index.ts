@@ -33,17 +33,12 @@ export const SCENARIOS: Record<ScenarioId, ScenarioRegistration> = {
     scenario: SECOND_SATURDAY,
     meta: {
       order: 2,
-      description: 'Субота, 8:15. Ліза спить, Олеся на обміні. Акт 1 готовий — ранок у квартирі.',
+      description: 'Субота, 8:15. Ліза спить, Олеся на обміні. Акти 1-2 готові; Акт 3 ще попереду.',
       icon: '\u{1F3E0}', // 🏠 (house)
       unlock: cond.questDone(QUESTS.FIRST_DAY),
-      // Тимчасово: вважаємо сценарій пройденим, якщо гравець дійшов до
-      // кінця Акту 1 (тобто зробив вибір про пральну машину). Буде замінено
-      // на справжній "scenario done" flag, коли Акти 2-3 будуть готові.
-      done: cond.any(
-        cond.flag(FLAGS.SATURDAY_LAUNDRY_RAN),
-        cond.flag(FLAGS.SATURDAY_LAUNDRY_WAITED),
-        cond.flag(FLAGS.SATURDAY_LAUNDRY_HANDWASH),
-      ),
+      // Тимчасово: вважаємо сценарій пройденим після завершення Акту 2.
+      // Буде замінено на справжній "scenario done" flag, коли Акт 3 буде готовим.
+      done: cond.flag(FLAGS.ACT2_DONE),
     },
   },
 };
