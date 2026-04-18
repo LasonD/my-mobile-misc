@@ -498,7 +498,7 @@ export const SECOND_SATURDAY: Scenario = {
         // Common:
         { speaker: 'dasha', text: '(теж бачу.)' },
         { speaker: 'narrator', text: 'Олеся на екрані відвертається — хтось стукає у її двері.' },
-        { speaker: 'olesia', text: 'Секунду. Це знову наша коридорна...' },
+        { speaker: 'olesia', text: 'Секунду, хлопці...' },
         { speaker: 'dasha', text: '(зараз. або ні.)' },
       ],
       next: 'dasha_reaction',
@@ -546,7 +546,7 @@ export const SECOND_SATURDAY: Scenario = {
         {
           condition: cond.flag(FLAGS.OLESYA_ASKED_DIRECTLY),
           speaker: 'olesia',
-          text: 'Сорі. Сусідка наша — знову коридор їй не подобається. Ти щось питала?',
+          text: 'Сорі, сорі. Хлопці в коридорі. А, ти щось питала?',
         },
         {
           condition: cond.flag(FLAGS.OLESYA_ASKED_DIRECTLY),
@@ -627,7 +627,7 @@ export const SECOND_SATURDAY: Scenario = {
         {
           condition: cond.flag(FLAGS.OLESYA_IGNORED_OVERWORK),
           speaker: 'olesia',
-          text: 'Все, сусідка знову про коридор. Мушу йти. Обійми Лізі.',
+          text: 'Все, хлопці стукають ще. Мушу йти. Обійми Лізі.',
         },
         {
           condition: cond.flag(FLAGS.OLESYA_IGNORED_OVERWORK),
