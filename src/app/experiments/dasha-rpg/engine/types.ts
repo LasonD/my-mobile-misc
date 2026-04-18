@@ -111,7 +111,12 @@ export interface CharacterDef {
    */
   render: (scene: Phaser.Scene, emotion: EmotionId | undefined) => Phaser.GameObjects.GameObject;
   voice?: VoiceProfile;
-  /** For UI tags — short bio shown in a future character log. */
+  /**
+   * One-line joke/fact in Dasha's voice that captures the character and
+   * their relationship to her. Shown on the directory card by default.
+   */
+  hook?: string;
+  /** Longer-form description. Shown in the modal when the card is tapped. */
   bio?: string;
 }
 

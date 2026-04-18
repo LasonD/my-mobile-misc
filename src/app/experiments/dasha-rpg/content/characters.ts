@@ -13,6 +13,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     color: 0xcdb4db,
     render: (scene) => renderDashaSprite(scene),
     voice: { lang: 'uk-UA', pitch: 1.25, rate: 1.1, volume: 1.0 },
+    hook: 'Це я. 19, психологія КШЕ, майбутня сексологиня. З Лелюхівки — в топи.',
     bio: 'Дарія Гак, с. Лелюхівка → Київ. Першокурсниця КШЕ, психологія, напрям сексології.',
   },
   valeria: {
@@ -22,6 +23,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F3EB}', ring: 0xb56a8c, bg: 0xf6e4ec }), // 👩‍🏫
     voice: { lang: 'uk-UA', pitch: 1.05, rate: 1.05, volume: 1.0 },
+    hook: 'Моя викладачка. «Маленька правочка» = два тижні.',
     bio: 'Викладачка КШЕ, з якою у Даші тісний контакт. Керівниця в кількох спільних статтях; Даша часто допомагає з організацією подій і презентацій.',
   },
   yasya: {
@@ -31,6 +33,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F393}', ring: 0xe28a4a, bg: 0xfceedc }), // 👩‍🎓
     voice: { lang: 'uk-UA', pitch: 1.0, rate: 0.98, volume: 1.0 },
+    hook: 'Старша подруга. Була моя підопічна. Тепер розраховується кавою.',
     bio: 'Подруга Даші, ~30 років, психологія КШЕ (старший курс). Колись Даша була її баді на першому курсі — вводила в курс справ. Тепер Яся повертає послугу.',
   },
   olesia: {
@@ -40,7 +43,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F4BC}', ring: 0xe8b04a, bg: 0xfff5dc }), // 👩‍💼
     voice: { lang: 'uk-UA', pitch: 1.1, rate: 1.0, volume: 1.0 },
-    bio: 'Співмешканка. Економіка КШЕ. Дисциплінована як бюджет.',
+    hook: 'Сусідка-економістка. На Еразмусі. Excel на ранкову рутину.',
+    bio: 'Співмешканка. Економіка КШЕ. Дисциплінована як бюджет. Зараз на обміні 3 місяці — тимчасово не в квартирі.',
   },
   liza: {
     id: 'liza',
@@ -49,7 +53,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F373}', ring: 0xd9527a, bg: 0xfce3ec }), // 👩‍🍳
     voice: { lang: 'uk-UA', pitch: 1.15, rate: 1.05, volume: 0.98 },
-    bio: 'Співмешканка. Економіка КШЕ + офіціантка. Повертається о 2-й.',
+    hook: 'Сусідка. О 2-й — її зміна, моя безсонниця.',
+    bio: 'Співмешканка. Економіка КШЕ + офіціантка в Ретровілі. Повертається о 2-й. Любить поспати у вихідні. Автор SLA «Саша ≤ 3 дні на тиждень».',
   },
   sasha: {
     id: 'sasha',
@@ -58,7 +63,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F527}', ring: 0x3d4a5c, bg: 0xe5e9ef }), // 👨‍🔧
     voice: { lang: 'uk-UA', pitch: 0.85, rate: 1.0, volume: 1.0 },
-    bio: 'Хлопець Даші. Живе аж в Обухові. Чорний Golf універсал, дизель.',
+    hook: 'Хлопець. Обухов, Golf, TikTok. Ревную до Golf-а.',
+    bio: 'Хлопець Даші, 23. Програміст. Живе в Обухові. Чорний Golf універсал, дизель — пробіг пам\'ятаю краще, ніж наші дати. Прокрастинує в телефоні, потім допрацьовує до ночі.',
   },
   max_cat: {
     id: 'max_cat',
@@ -67,7 +73,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F431}', ring: 0xb58868, bg: 0xf3e3d2 }), // 🐱
     voice: { lang: 'uk-UA', pitch: 1.8, rate: 1.1, volume: 0.9 },
-    bio: 'Шотландський прямовухий. Живе в Обухові. Єдина причина туди їздити.',
+    hook: 'Єдина поважна причина їхати в Обухов.',
+    bio: 'Шотландський прямовухий. Живе в Саши в Обухові. Терапевт без диплома.',
   },
   mylovanov: {
     id: 'mylovanov',
@@ -76,7 +83,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F9D1}\u200D\u{1F4BC}', ring: 0x1b3a5f, bg: 0xeaf0f8 }), // 🧑‍💼
     voice: { lang: 'uk-UA', pitch: 0.75, rate: 0.95, volume: 1.0 },
-    bio: 'Президент КШЕ. PhD Wisconsin. Колишній міністр економіки. Twitter-економіст.',
+    hook: 'Лайкнув моє селфі. ПРЕЗИДЕНТ. Лайкнув. Селфі.',
+    bio: 'Президент КШЕ. PhD Wisconsin. Колишній міністр економіки. Twitter-економіст (@Mylovanov).',
   },
   brik: {
     id: 'brik',
@@ -85,7 +93,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F3EB}', ring: 0x355c7d, bg: 0xe6eef3 }), // 👨‍🏫
     voice: { lang: 'uk-UA', pitch: 0.85, rate: 1.0, volume: 1.0 },
-    bio: 'Ректор КШЕ з 2022. Соціолог (PhD Мадрид). Сповідує network analysis.',
+    hook: 'Ректор-соціолог. Цілий день у network analysis.',
+    bio: 'Ректор КШЕ з 2022. Соціолог релігії, PhD Мадрид, магістр Утрехт. Сповідує network analysis.',
   },
   prof_psy: {
     id: 'prof_psy',
@@ -94,7 +103,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F469}\u200D\u{1F3EB}', ring: 0x7a5ea8, bg: 0xf1ebfa }), // 👩‍🏫
     voice: { lang: 'uk-UA', pitch: 1.05, rate: 0.95, volume: 1.0 },
-    bio: 'Викладачка психології. Шанує CBT і каву без цукру.',
+    hook: 'Жорстка. Справедлива. Кава без цукру.',
+    bio: 'Викладачка психології КШЕ. Шанує CBT і каву без цукру. «Запам\'ятала» = є на радарі.',
   },
   yegor: {
     id: 'yegor',
@@ -103,7 +113,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F3EB}', ring: 0x4a6b8c, bg: 0xe8eff5 }), // 👨‍🏫
     voice: { lang: 'uk-UA', pitch: 0.9, rate: 1.0, volume: 1.0 },
-    bio: 'Викладач, співавтор Даші по дослідженню про сексуальну реабілітацію ветеранів. Ідеолог "давай ти все напишеш, я підпишу".',
+    hook: '«Співавтор» статті про ветеранів. Пише одне слово — своє ім\'я.',
+    bio: 'Викладач, співавтор Даші по дослідженню про сексуальну реабілітацію поранених ветеранів. Важко шукати респондентів, а Єгор мало включається — хоч і буде першим автором.',
   },
   security: {
     id: 'security',
@@ -112,7 +123,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F482}', ring: 0x5a6b4d, bg: 0xeef0e7 }), // 💂
     voice: { lang: 'uk-UA', pitch: 0.7, rate: 0.9, volume: 1.0 },
-    bio: 'Бастіон перепустки. Знає всіх в обличчя. Майже.',
+    hook: '«Сексологія — це вид спорту?» Тепер знає, що ні.',
+    bio: 'Бастіон перепустки на вході КШЕ. Знає всіх в обличчя. Майже.',
   },
   alex: {
     id: 'alex',
@@ -121,7 +133,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F913}', ring: 0x3d7d9a, bg: 0xe7f2f7 }), // 🤓
     voice: { lang: 'uk-UA', pitch: 0.95, rate: 1.1, volume: 0.95 },
-    bio: 'Першокурсник-економіст. Уже планує вступати в Гарвард.',
+    hook: 'Одногрупник. Другий тиждень — уже планує Гарвард.',
+    bio: 'Першокурсник-економіст КШЕ. Уже планує вступати в Гарвард на магістра. Ми на другому тижні.',
   },
   marta: {
     id: 'marta',
@@ -130,7 +143,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     render: (scene) =>
       renderEmojiAvatar(scene, { emoji: '\u{1F9DA}\u200D\u2640\uFE0F', ring: 0xb28a6a, bg: 0xf6ede3 }), // 🧚‍♀️
     voice: { lang: 'uk-UA', pitch: 1.3, rate: 0.9, volume: 0.95 },
-    bio: 'Арт-клуб, живопис, філософія на 2-й парі.',
+    hook: 'Арт-клуб. На 2-й парі — філософія, на 3-й — дзен.',
+    bio: 'Одногрупниця з арт-клубу. Живопис, філософія на 2-й парі. Її спокій — підозріло ефективний.',
   },
 };
 
