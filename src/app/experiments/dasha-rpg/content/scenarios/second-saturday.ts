@@ -445,9 +445,9 @@ export const SECOND_SATURDAY: Scenario = {
     olesya_call: {
       location: 'apartment_kitchen_evening',
       characters: [
-        { id: 'dasha', position: 'left' },
+        { id: 'dasha', position: 'far-left' },
         { id: 'olesia', position: 'center' },
-        { id: 'liza', position: 'right' },
+        { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
         { speaker: 'narrator', text: 'Даша приймає виклик. На екрані — Олеся.' },
@@ -473,9 +473,9 @@ export const SECOND_SATURDAY: Scenario = {
     liza_notices: {
       location: 'apartment_kitchen_evening',
       characters: [
-        { id: 'dasha', position: 'left' },
+        { id: 'dasha', position: 'far-left' },
         { id: 'olesia', position: 'center' },
-        { id: 'liza', position: 'right' },
+        { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
         { speaker: 'narrator', text: 'Ліза відкладає серіал і нахиляється до Даши.' },
@@ -498,7 +498,7 @@ export const SECOND_SATURDAY: Scenario = {
         // Common:
         { speaker: 'dasha', text: '(теж бачу.)' },
         { speaker: 'narrator', text: 'Олеся на екрані відвертається — хтось стукає у її двері.' },
-        { speaker: 'olesia', text: 'Секунду, хлопці...' },
+        { speaker: 'olesia', text: 'Секунду. Це знову наша коридорна...' },
         { speaker: 'dasha', text: '(зараз. або ні.)' },
       ],
       next: 'dasha_reaction',
@@ -507,9 +507,9 @@ export const SECOND_SATURDAY: Scenario = {
     dasha_reaction: {
       location: 'apartment_kitchen_evening',
       characters: [
-        { id: 'dasha', position: 'left' },
+        { id: 'dasha', position: 'far-left' },
         { id: 'olesia', position: 'center' },
-        { id: 'liza', position: 'right' },
+        { id: 'liza', position: 'far-right' },
       ],
       onEnter: [fx.flag(FLAGS.OLESYA_OVERWORK_SUSPECTED)],
       dialogue: [
@@ -537,16 +537,16 @@ export const SECOND_SATURDAY: Scenario = {
     call_ends: {
       location: 'apartment_kitchen_evening',
       characters: [
-        { id: 'dasha', position: 'left' },
+        { id: 'dasha', position: 'far-left' },
         { id: 'olesia', position: 'center' },
-        { id: 'liza', position: 'right' },
+        { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
         // ========== DIRECT branch ==========
         {
           condition: cond.flag(FLAGS.OLESYA_ASKED_DIRECTLY),
           speaker: 'olesia',
-          text: 'Сорі, сорі. Хлопці в коридорі. А, ти щось питала?',
+          text: 'Сорі. Сусідка наша — знову коридор їй не подобається. Ти щось питала?',
         },
         {
           condition: cond.flag(FLAGS.OLESYA_ASKED_DIRECTLY),
@@ -627,7 +627,7 @@ export const SECOND_SATURDAY: Scenario = {
         {
           condition: cond.flag(FLAGS.OLESYA_IGNORED_OVERWORK),
           speaker: 'olesia',
-          text: 'Все, хлопці стукають ще. Мушу йти. Обійми Лізі.',
+          text: 'Все, сусідка знову про коридор. Мушу йти. Обійми Лізі.',
         },
         {
           condition: cond.flag(FLAGS.OLESYA_IGNORED_OVERWORK),

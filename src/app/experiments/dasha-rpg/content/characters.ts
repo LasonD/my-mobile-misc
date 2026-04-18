@@ -86,7 +86,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
         id: 'liza',
         gender: 'f',
         skin: 0xffd4b8,
-        hair: { color: 0x8a2e2a, style: 'long' },
+        hair: { color: 0x3a2218, style: 'long' },
         eye: 0x4a3a2a,
         shirt: { color: 0xe68aa3, style: 'plain' },
       }),

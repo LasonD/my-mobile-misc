@@ -504,6 +504,12 @@ export class RpgScene extends Phaser.Scene {
     const dialogTop = height - this.dialogBoxH - 12;
     let cursorY = Math.max(16, dialogTop - 20 - totalH);
 
+    // Zones are created non-interactive and enabled only after the fade-in
+    // completes. Without this, a pointerdown that advanced the dialogue also
+    // lingers as a pointerup, which then fires on a choice button the engine
+    // just mounted — the player selects an option they didn't read.
+    const zones: Phaser.GameObjects.Zone[] = [];
+
     layouts.forEach((layout, idx) => {
       const x = (width - btnW) / 2;
       const y = cursorY;
@@ -518,10 +524,7 @@ export class RpgScene extends Phaser.Scene {
       label.setPosition(x + padX, y + padY);
       hint?.setPosition(x + padX, y + padY + label.height + gapLabelHint);
 
-      const zone = this.add
-        .zone(x, y, btnW, btnH)
-        .setOrigin(0)
-        .setInteractive({ useHandCursor: true });
+      const zone = this.add.zone(x, y, btnW, btnH).setOrigin(0);
       const hoverTargets: Phaser.GameObjects.GameObject[] = hint
         ? [bg, label, hint]
         : [bg, label];
@@ -532,6 +535,7 @@ export class RpgScene extends Phaser.Scene {
         this.tweens.add({ targets: hoverTargets, alpha: 1, duration: 120 });
       });
       zone.on('pointerup', () => this.handleChoice(choices, idx));
+      zones.push(zone);
 
       const children: Phaser.GameObjects.GameObject[] = hint
         ? [bg, label, hint, zone]
@@ -543,7 +547,14 @@ export class RpgScene extends Phaser.Scene {
 
     this.choicesContainer = container;
     container.setAlpha(0);
-    this.tweens.add({ targets: container, alpha: 1, duration: 220 });
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      duration: 220,
+      onComplete: () => {
+        for (const z of zones) z.setInteractive({ useHandCursor: true });
+      },
+    });
     this.playSfx('pop');
   }
 

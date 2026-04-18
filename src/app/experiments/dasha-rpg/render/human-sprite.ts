@@ -206,15 +206,14 @@ function paintHairFront(g: Phaser.GameObjects.Graphics, cfg: HumanConfig, p: Pal
       drawRect(g, 32, 12, 2, 14, p.hairHi);
       break;
     case 'long':
-      drawEllipse(g, 28, 20, 24, 18, p.hair);
-      drawEllipse(g, 28, 14, 16, 5, p.hair);
-      drawPixel(g, 27, 13, p.hairHi);
-      drawPixel(g, 28, 13, p.hairHi);
-      drawPixel(g, 22, 14, p.hair);
-      drawPixel(g, 21, 16, p.hair);
-      drawPixel(g, 20, 18, p.hair);
-      drawRect(g, 22, 12, 2, 20, p.hairHi);
-      drawRect(g, 32, 12, 2, 20, p.hairHi);
+      // Crown + bangs (same footprint as 'medium'/'bob') so face stays visible.
+      drawEllipse(g, 28, 17, 18, 9, p.hair);
+      drawRect(g, 12, 19, 32, 4, p.hair);
+      // Side locks framing the face, stopping well above the jaw.
+      drawRect(g, 10, 23, 3, 12, p.hair);
+      drawRect(g, 43, 23, 3, 12, p.hair);
+      drawPixel(g, 22, 14, p.hairHi);
+      drawPixel(g, 32, 14, p.hairHi);
       break;
     case 'bob':
       drawEllipse(g, 28, 18, 16, 9, p.hair);
