@@ -82,11 +82,19 @@ export class TitleScene extends Phaser.Scene {
     this.drawDirectoryButton(state);
     this.drawFactTicker();
 
-    // Browsers block autoplay until the user interacts — kick off the
-    // title-theme fade-in on the first tap alongside the SFX unlock.
+    // Try to start the title theme right away. In a Capacitor WebView
+    // autoplay usually works — if the AudioContext is suspended (e.g. pure
+    // browser before any user gesture), this plays silently and `pointerdown`
+    // below will kick a fresh attempt.
+    this.themePlayer = playTitleTheme(this);
     this.input.once('pointerdown', () => {
       this.sfx.resume();
-      this.themePlayer = playTitleTheme(this);
+      // If the eager attempt above is already playing, AmbientPlayer.playKey
+      // is a no-op for the same key. Otherwise this re-arms it under a fresh
+      // user gesture, which unlocks audio in stricter environments.
+      if (!this.themePlayer) {
+        this.themePlayer = playTitleTheme(this);
+      }
     });
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => {
@@ -156,18 +164,20 @@ export class TitleScene extends Phaser.Scene {
         strokeThickness: 5,
       })
       .setOrigin(0.5);
+    this.fitLineWidth(this.titleText);
 
     const firstSubtitle = SUBTITLE_VARIANTS[this.subtitleOrder[this.subtitleCursor % this.subtitleOrder.length]];
     this.subtitleCursor++;
 
     this.subtitleText = this.add
-      .text(cx, y + this.titleText.height * 0.7, firstSubtitle, {
+      .text(cx, y + this.titleText.displayHeight * 0.7, firstSubtitle, {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '16px' : '20px',
         color: '#cdb4db',
         fontStyle: 'italic',
       })
       .setOrigin(0.5);
+    this.fitLineWidth(this.subtitleText);
     const sub = this.subtitleText;
 
     this.titleTimer = this.time.addEvent({
@@ -232,21 +242,6 @@ export class TitleScene extends Phaser.Scene {
     const listHeight = listBottom - listTop;
 
     const entries: LevelEntry[] = [];
-
-    // Resume entry (if mid-scenario)
-    const midway =
-      state && state.currentScenario && state.currentNode && !this.isScenarioDone(state, state.currentScenario);
-    if (midway) {
-      const reg = listScenarios().find((r) => r.scenario.id === state!.currentScenario);
-      entries.push({
-        kind: 'resume',
-        title: '⏵ Продовжити',
-        description: reg ? `${reg.scenario.title} — ${state!.currentNode}` : 'Недавня сесія',
-        icon: '\u{1F4CD}',
-        status: 'available',
-        onClick: () => this.startScenario(state!.currentScenario!, { load: true }),
-      });
-    }
 
     // Registered scenarios
     for (const reg of listScenarios()) {
@@ -683,6 +678,7 @@ export class TitleScene extends Phaser.Scene {
       duration: 500,
       onComplete: () => {
         this.titleText!.setText(next);
+        this.fitLineWidth(this.titleText!);
         this.tweens.add({ targets: this.titleText, alpha: 1, duration: 500 });
       },
     });
@@ -700,9 +696,23 @@ export class TitleScene extends Phaser.Scene {
       duration: 500,
       onComplete: () => {
         this.subtitleText!.setText(next);
+        this.fitLineWidth(this.subtitleText!);
         this.tweens.add({ targets: this.subtitleText, alpha: 1, duration: 500 });
       },
     });
+  }
+
+  /**
+   * Scale the text object down uniformly if its unscaled width exceeds the
+   * available horizontal space. Preserves the font-rendered crispness —
+   * cheaper than re-measuring at lower font sizes.
+   */
+  private fitLineWidth(text: Phaser.GameObjects.Text) {
+    const maxWidth = this.scale.width - 32;
+    text.setScale(1);
+    if (text.width > maxWidth) {
+      text.setScale(maxWidth / text.width);
+    }
   }
 
   private shuffledIndices(n: number): number[] {
@@ -722,7 +732,7 @@ export class TitleScene extends Phaser.Scene {
 }
 
 interface LevelEntry {
-  kind: 'resume' | 'scenario' | 'upcoming';
+  kind: 'scenario' | 'upcoming';
   title: string;
   description: string;
   icon: string;
