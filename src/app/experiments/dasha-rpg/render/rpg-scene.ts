@@ -57,6 +57,9 @@ export class RpgScene extends Phaser.Scene {
   // HUD
   private questBanner?: Phaser.GameObjects.Container;
 
+  // Current dialog box height (dynamic). Used to compute stage-Y for characters.
+  private dialogBoxH = 120;
+
   constructor() {
     super('rpg');
   }
@@ -212,11 +215,10 @@ export class RpgScene extends Phaser.Scene {
       }
     }
 
-    // Characters sit on an invisible "stage" line that is 12 px above the
+    // Characters sit on an invisible "stage" line that is 24 px above the
     // dialogue box top. Sprite origins are bottom-center so this keeps them
     // from being clipped by the text panel on any screen size.
-    const dialogBoxH = Math.min(240, this.scale.height * 0.38);
-    const stageY = this.scale.height - dialogBoxH - 24;
+    const stageY = this.scale.height - this.dialogBoxH - 24;
 
     // Add/update current characters
     for (const placement of characters) {
@@ -279,16 +281,13 @@ export class RpgScene extends Phaser.Scene {
   // ---------------- Dialogue UI ----------------
 
   private buildDialogueUi() {
-    const { width, height } = this.scale;
-    const boxH = Math.min(240, height * 0.38);
-    const boxY = height - boxH - 12;
+    const { width } = this.scale;
     const pad = 16;
 
     this.dialogueBox = this.add.graphics().setDepth(20);
-    this.redrawDialogueBox();
 
     this.speakerText = this.add
-      .text(pad + 16, boxY + 14, '', {
+      .text(0, 0, '', {
         fontFamily: 'Georgia, serif',
         fontSize: '19px',
         color: '#cdb4db',
@@ -297,7 +296,7 @@ export class RpgScene extends Phaser.Scene {
       .setDepth(21);
 
     this.dialogueText = this.add
-      .text(pad + 16, boxY + 50, '', {
+      .text(0, 0, '', {
         fontFamily: 'Georgia, serif',
         fontSize: '18px',
         color: '#fdf6f3',
@@ -307,7 +306,7 @@ export class RpgScene extends Phaser.Scene {
       .setDepth(21);
 
     this.hintText = this.add
-      .text(width - pad - 16, boxY + boxH - 26, '— тап, щоб далі —', {
+      .text(0, 0, '— тап, щоб далі —', {
         fontFamily: 'Georgia, serif',
         fontSize: '13px',
         color: '#baa6d4',
@@ -323,20 +322,63 @@ export class RpgScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1,
     });
+
+    this.layoutDialogueBox('');
   }
 
-  private redrawDialogueBox() {
+  /**
+   * Measures the wrapped dialogue text height, resizes the box to fit, and
+   * repositions the speaker / hint labels. Returns the new box height so
+   * callers can reposition characters above it.
+   */
+  private layoutDialogueBox(fullText: string): number {
     const { width, height } = this.scale;
-    const boxH = Math.min(240, height * 0.38);
-    const boxY = height - boxH - 12;
     const pad = 16;
+    const innerPadX = 16;
+    const speakerH = 22;
+    const gapAfterSpeaker = 14;
+    const hintH = 26;
+
+    // Measure with the full (not typed) text so the box doesn't jitter.
+    const prev = this.dialogueText?.text ?? '';
+    this.dialogueText?.setText(fullText || ' ');
+    const textH = this.dialogueText?.height ?? 0;
+    this.dialogueText?.setText(prev);
+
+    const contentH = speakerH + gapAfterSpeaker + textH + hintH + 14; // +14 top pad
+    const minH = 96;
+    const maxH = Math.min(260, height * 0.42);
+    const boxH = Math.max(minH, Math.min(maxH, contentH));
+    const boxY = height - boxH - 12;
+
     const g = this.dialogueBox;
-    if (!g) return;
-    g.clear();
-    g.fillStyle(0x1a1428, 0.88);
-    g.fillRoundedRect(pad, boxY, width - pad * 2, boxH, 16);
-    g.lineStyle(3, 0xcdb4db, 1);
-    g.strokeRoundedRect(pad, boxY, width - pad * 2, boxH, 16);
+    if (g) {
+      g.clear();
+      g.fillStyle(0x1a1428, 0.88);
+      g.fillRoundedRect(pad, boxY, width - pad * 2, boxH, 16);
+      g.lineStyle(3, 0xcdb4db, 1);
+      g.strokeRoundedRect(pad, boxY, width - pad * 2, boxH, 16);
+    }
+
+    this.speakerText?.setPosition(pad + innerPadX, boxY + 12);
+    this.dialogueText?.setPosition(pad + innerPadX, boxY + 12 + speakerH + gapAfterSpeaker - 4);
+    this.hintText?.setPosition(width - pad - innerPadX, boxY + boxH - 22);
+
+    this.dialogBoxH = boxH;
+    return boxH;
+  }
+
+  private repositionStage() {
+    const stageY = this.scale.height - this.dialogBoxH - 24;
+    for (const [, widget] of this.stage.entries()) {
+      const obj = widget as Phaser.GameObjects.Container;
+      this.tweens.add({
+        targets: obj,
+        y: stageY,
+        duration: 260,
+        ease: 'Sine.easeInOut',
+      });
+    }
   }
 
   private onLineShown(payload: { line: DialogueLine; index: number; total: number }) {
@@ -358,6 +400,10 @@ export class RpgScene extends Phaser.Scene {
     this.currentFullText = line.text;
     this.typewriterDone = false;
     this.dialogueText?.setText('');
+
+    // Resize the dialog box to fit the new line, then glide characters above it.
+    this.layoutDialogueBox(line.text);
+    this.repositionStage();
     this.typewriterTimer?.remove();
     this.typewriterTimer = this.time.addEvent({
       delay: 24,
@@ -554,7 +600,8 @@ export class RpgScene extends Phaser.Scene {
 
   private onResize = (gameSize: Phaser.Structs.Size) => {
     this.cameras.resize(gameSize.width, gameSize.height);
-    this.redrawDialogueBox();
+    this.layoutDialogueBox(this.currentFullText);
+    this.repositionStage();
   };
 
   // ---------------- Audio ----------------

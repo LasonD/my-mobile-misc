@@ -18,23 +18,25 @@ export function renderEmojiAvatar(
   scene: Phaser.Scene,
   opts: EmojiCharacterOptions
 ): Phaser.GameObjects.Container {
+  // Bottom-center anchored: container (0,0) corresponds to bottom of the avatar,
+  // so positioning at stageY lines up exactly with Dasha's pixel sprite (which
+  // also has bottom-center origin) and keeps the avatar out of the dialogue box.
   const container = scene.add.container(0, 0);
-  const shadow = scene.add.ellipse(4, RADIUS + 8, RADIUS * 2 - 4, 18, 0x000000, 0.25);
-  const bg = scene.add.circle(0, 0, RADIUS, opts.bg);
+  const cy = -RADIUS;
+  const shadow = scene.add.ellipse(4, 8, RADIUS * 2 - 4, 14, 0x000000, 0.28);
+  const bg = scene.add.circle(0, cy, RADIUS, opts.bg);
   const ring = scene.add.graphics();
   ring.lineStyle(5, opts.ring, 1);
-  ring.strokeCircle(0, 0, RADIUS);
+  ring.strokeCircle(0, cy, RADIUS);
   ring.lineStyle(2, 0xffffff, 0.6);
-  ring.strokeCircle(0, 0, RADIUS - 4);
+  ring.strokeCircle(0, cy, RADIUS - 4);
   const emoji = scene.add
-    .text(0, 6, opts.emoji, {
+    .text(0, cy + 6, opts.emoji, {
       fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
       fontSize: '84px',
     })
     .setOrigin(0.5);
   container.add([shadow, bg, ring, emoji]);
-  // Origin point for positioning: the bottom-center of the avatar
-  (container as unknown as { __pivotY?: number }).__pivotY = RADIUS;
   return container;
 }
 
