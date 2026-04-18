@@ -1,11 +1,25 @@
 import * as Phaser from 'phaser';
 
+import {
+  driftCloud,
+  scheduleRecurring,
+  spawnBird,
+  spawnDustMote,
+  spawnPasserby,
+  spawnSteamPuff,
+  spawnTwinkle,
+} from './ambient';
 import { LocationDef, LocationId } from '../engine/types';
 
 /**
  * Every location is a self-contained builder that returns a single
  * GameObject (typically a Container) representing the background scene.
  * Scene will destroy it on transition and instantiate a new one.
+ *
+ * Ambient life (birds, passersby, steam, …) is layered in through child
+ * containers so it can sit either behind or in front of foreground props.
+ * All spawners are bound to the host container's DESTROY event via
+ * `scheduleRecurring` — no manual cleanup needed at call sites.
  */
 
 function gradientBg(
@@ -22,8 +36,16 @@ function gradientBg(
   return g;
 }
 
-function addClouds(scene: Phaser.Scene, container: Phaser.GameObjects.Container) {
+/**
+ * Adds clouds and returns them so callers can drift them. Each cloud is an
+ * independent Arc (circle) so `driftCloud` can tween it across the screen.
+ */
+function addClouds(
+  scene: Phaser.Scene,
+  container: Phaser.GameObjects.Container
+): Phaser.GameObjects.Arc[] {
   const { width, height } = scene.scale;
+  const clouds: Phaser.GameObjects.Arc[] = [];
   for (let i = 0; i < 10; i++) {
     const c = scene.add.circle(
       Phaser.Math.Between(0, width),
@@ -33,7 +55,9 @@ function addClouds(scene: Phaser.Scene, container: Phaser.GameObjects.Container)
       0.45
     );
     container.add(c);
+    clouds.push(c);
   }
+  return clouds;
 }
 
 function addFloor(
@@ -58,7 +82,14 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       const { width, height } = scene.scale;
       const container = scene.add.container(0, 0);
       container.add(gradientBg(scene, 0xaacce4, 0xc5dcea, 0xdfe9ed, 0xe8f0f1));
-      addClouds(scene, container);
+
+      // Clouds — drifting slowly across the sky.
+      const clouds = addClouds(scene, container);
+      clouds.forEach((c) => driftCloud(scene, container, c));
+
+      // Bird layer sits over clouds but behind the building silhouette.
+      const birdLayer = scene.add.container(0, 0);
+      container.add(birdLayer);
 
       // Ground path
       addFloor(scene, container, 0x96a899, height * 0.72);
@@ -71,24 +102,19 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       const bh = height * 0.42;
       building.fillStyle(0xf0ede4, 1);
       building.fillRoundedRect(bx, by, bw, bh, 4);
-      // Roof
       building.fillStyle(0xcfc7b4, 1);
       building.fillRect(bx - 6, by, bw + 12, 12);
-      // Columns
       building.fillStyle(0xd9d3c3, 1);
       for (let i = 0; i < 6; i++) {
         const cx = bx + 20 + i * (bw / 6);
         building.fillRect(cx, by + 20, 16, bh - 40);
       }
-      // Door
       building.fillStyle(0x4a3a2d, 1);
       building.fillRoundedRect(bx + bw / 2 - 28, by + bh - 70, 56, 70, 4);
-      // Gold KSE sign
       building.fillStyle(0xe6b23a, 1);
       building.fillRect(bx + bw / 2 - 34, by + 18, 68, 10);
       container.add(building);
 
-      // Sign text
       const sign = scene.add
         .text(width / 2, by + 23, 'КШЕ', {
           fontFamily: 'Georgia, serif',
@@ -98,6 +124,45 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
         })
         .setOrigin(0.5);
       container.add(sign);
+
+      // Passerby layer — walkers along the path, in front of the building.
+      const passerbyLayer = scene.add.container(0, 0);
+      container.add(passerbyLayer);
+
+      // Birds glide across every 4–9s, sometimes in small flocks.
+      scheduleRecurring(scene, birdLayer, {
+        minMs: 4000,
+        maxMs: 9000,
+        initialDelayMs: 1800,
+        fn: () => {
+          const burst = Math.random() < 0.25 ? 3 : 1;
+          const y = Phaser.Math.Between(60, Math.floor(height * 0.22));
+          const dir: 'ltr' | 'rtl' = Math.random() < 0.5 ? 'ltr' : 'rtl';
+          for (let i = 0; i < burst; i++) {
+            scene.time.delayedCall(i * 180, () =>
+              spawnBird(scene, birdLayer, {
+                y: y + i * 10,
+                direction: dir,
+                scale: Phaser.Math.FloatBetween(0.75, 1.1),
+              })
+            );
+          }
+        },
+      });
+
+      // Passersby walk along the ground every 5–14s.
+      scheduleRecurring(scene, passerbyLayer, {
+        minMs: 5000,
+        maxMs: 14000,
+        initialDelayMs: 2500,
+        fn: () =>
+          spawnPasserby(scene, passerbyLayer, {
+            yFeet: height * 0.72 + Phaser.Math.Between(-2, 10),
+            scale: Phaser.Math.FloatBetween(0.75, 1.05),
+            speed: Phaser.Math.Between(60, 110),
+            color: Phaser.Math.RND.pick([0x2a1c2a, 0x3a2e3f, 0x4a2a32]),
+          }),
+      });
 
       return container;
     },
@@ -111,14 +176,12 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       const { width, height } = scene.scale;
       const container = scene.add.container(0, 0);
       container.add(gradientBg(scene, 0xf2ece0, 0xf0e6d2, 0xe4d8bc, 0xdccda5));
-
-      // Floor
       addFloor(scene, container, 0xb4a084, height * 0.68);
 
       // Back wall with diplomas/pictures
       const wallGfx = scene.add.graphics();
       for (let i = 0; i < 4; i++) {
-        const fx = (width * 0.15) + i * (width * 0.2);
+        const fx = width * 0.15 + i * (width * 0.2);
         const fy = height * 0.2;
         wallGfx.fillStyle(0xfffbea, 1);
         wallGfx.fillRect(fx, fy, width * 0.12, height * 0.18);
@@ -127,7 +190,11 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       }
       container.add(wallGfx);
 
-      // Reception desk
+      // Silhouette passerby layer — between back wall and foreground props.
+      const passerbyLayer = scene.add.container(0, 0);
+      container.add(passerbyLayer);
+
+      // Reception desk (hides the lower half of passersby for a parallax feel).
       const desk = scene.add.graphics();
       desk.fillStyle(0x6b4a30, 1);
       desk.fillRoundedRect(width * 0.1, height * 0.52, width * 0.3, 24, 4);
@@ -144,6 +211,38 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       plant.fillCircle(px + 4, py - 4, 12);
       plant.fillCircle(px + 26, py - 2, 12);
       container.add(plant);
+
+      // Dust/light mote layer — subtle indoor sparkle.
+      const moteLayer = scene.add.container(0, 0);
+      container.add(moteLayer);
+
+      // Students passing every 3–8s in the background.
+      scheduleRecurring(scene, passerbyLayer, {
+        minMs: 3000,
+        maxMs: 8000,
+        initialDelayMs: 1400,
+        fn: () =>
+          spawnPasserby(scene, passerbyLayer, {
+            yFeet: height * 0.6 + Phaser.Math.Between(-6, 6),
+            scale: Phaser.Math.FloatBetween(0.7, 0.9),
+            speed: Phaser.Math.Between(70, 130),
+            alpha: 0.38,
+            color: 0x2a1c2a,
+          }),
+      });
+
+      // Warm dust motes near the diploma wall.
+      scheduleRecurring(scene, moteLayer, {
+        minMs: 250,
+        maxMs: 700,
+        fn: () =>
+          spawnDustMote(scene, moteLayer, {
+            x: Phaser.Math.Between(width * 0.2, width * 0.85),
+            y: height * 0.5,
+            driftRange: 30,
+            tint: 0xfff0c2,
+          }),
+      });
 
       return container;
     },
@@ -192,8 +291,22 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       }
       container.add(desks);
 
-      // Floor
       addFloor(scene, container, 0x9d8366, height * 0.73);
+
+      // Dust motes drifting in front of the board — "chalk dust".
+      const moteLayer = scene.add.container(0, 0);
+      container.add(moteLayer);
+      scheduleRecurring(scene, moteLayer, {
+        minMs: 300,
+        maxMs: 900,
+        fn: () =>
+          spawnDustMote(scene, moteLayer, {
+            x: Phaser.Math.Between(width * 0.18, width * 0.82),
+            y: height * 0.46,
+            driftRange: 26,
+            tint: 0xe8e0c8,
+          }),
+      });
 
       return container;
     },
@@ -208,11 +321,14 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       const container = scene.add.container(0, 0);
       container.add(gradientBg(scene, 0xffe7cc, 0xffddd0, 0xffc7b2, 0xffb996));
 
-      // Tile stripe
       const stripe = scene.add.graphics();
       stripe.fillStyle(0x6b3a22, 1);
       stripe.fillRect(0, height * 0.38, width, 4);
       container.add(stripe);
+
+      // Passerby layer (behind the counter) for patrons milling about.
+      const passerbyLayer = scene.add.container(0, 0);
+      container.add(passerbyLayer);
 
       // Counter + coffee machine
       const counter = scene.add.graphics();
@@ -224,22 +340,50 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       counter.fillCircle(width * 0.3 + 35, height * 0.34, 6);
       container.add(counter);
 
-      // Menu board
       const menu = scene.add.graphics();
       menu.fillStyle(0x2a2a2a, 1);
       menu.fillRect(width * 0.55, height * 0.18, 130, 60);
       container.add(menu);
-      const menuText = scene.add
-        .text(width * 0.55 + 10, height * 0.2, 'Еспресо — 25\nЛате — 45\nPhD-шот — ∞', {
+      const menuText = scene.add.text(
+        width * 0.55 + 10,
+        height * 0.2,
+        'Еспресо — 25\nЛате — 45\nPhD-шот — ∞',
+        {
           fontFamily: 'Courier New, monospace',
           fontSize: '13px',
           color: '#f0eac2',
           lineSpacing: 4,
-        });
+        }
+      );
       container.add(menuText);
 
-      // Floor
       addFloor(scene, container, 0xb28a6a, height * 0.74);
+
+      // Steam from the coffee machine spout.
+      const steamLayer = scene.add.container(0, 0);
+      container.add(steamLayer);
+      const steamX = width * 0.3 + 35;
+      const steamY = height * 0.3 - 4;
+      scheduleRecurring(scene, steamLayer, {
+        minMs: 380,
+        maxMs: 900,
+        initialDelayMs: 400,
+        fn: () => spawnSteamPuff(scene, steamLayer, { x: steamX, y: steamY }),
+      });
+
+      // Patrons crossing the background every 5–12s.
+      scheduleRecurring(scene, passerbyLayer, {
+        minMs: 5000,
+        maxMs: 12000,
+        initialDelayMs: 3000,
+        fn: () =>
+          spawnPasserby(scene, passerbyLayer, {
+            yFeet: height * 0.38 + Phaser.Math.Between(-4, 4),
+            scale: Phaser.Math.FloatBetween(0.65, 0.85),
+            speed: Phaser.Math.Between(70, 110),
+            alpha: 0.4,
+          }),
+      });
 
       return container;
     },
@@ -284,8 +428,35 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       desk.fillRect(width * 0.56, height * 0.49, 20, 30);
       container.add(desk);
 
-      // Floor
       addFloor(scene, container, 0xa88fc8, height * 0.76);
+
+      // Twinkling fairy-light row along the window + slow breathing window glow.
+      const twinkleLayer = scene.add.container(0, 0);
+      container.add(twinkleLayer);
+      const windowCx = width * 0.6 + (width * 0.25) / 2;
+      const windowCy = height * 0.18 + (height * 0.25) / 2;
+
+      scheduleRecurring(scene, twinkleLayer, {
+        minMs: 260,
+        maxMs: 700,
+        fn: () =>
+          spawnTwinkle(scene, twinkleLayer, {
+            x: windowCx,
+            y: windowCy,
+            range: width * 0.22,
+            color: 0xffe8a8,
+          }),
+      });
+
+      // Very subtle warm pulsing inside the window — like a lantern breathing.
+      scene.tweens.add({
+        targets: w,
+        alpha: { from: 1, to: 0.85 },
+        duration: 2400,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
 
       return container;
     },
