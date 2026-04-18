@@ -17,6 +17,7 @@ import {
   LocationId,
   Position,
   QuestId,
+  Scenario,
   SoundKey,
 } from '../engine/types';
 import { Voice } from './voice';
@@ -432,56 +433,88 @@ export class RpgScene extends Phaser.Scene {
     this.choicesContainer?.destroy();
     const { width, height } = this.scale;
     const container = this.add.container(0, 0).setDepth(25);
-    const startY = height * 0.18;
     const btnW = Math.min(width * 0.86, 500);
-    const gap = 14;
+    const innerW = btnW - 36;
+    const padX = 18;
+    const padY = 12;
+    const gapBetween = 12;
+    const gapLabelHint = 4;
 
-    choices.forEach((choice, idx) => {
-      const y = startY + idx * (56 + gap);
-      const x = (width - btnW) / 2;
-
-      const bg = this.add.graphics();
-      bg.fillStyle(0x1f1630, 0.95);
-      bg.fillRoundedRect(x, y, btnW, 56, 10);
-      bg.lineStyle(2, 0xcdb4db, 1);
-      bg.strokeRoundedRect(x, y, btnW, 56, 10);
-
-      const textStr = choice.hint ? `${choice.text}\n${choice.hint}` : choice.text;
+    // Build labels first so we can compute each button's height from wrapped
+    // text. Then stack them bottom-up above the dialog box.
+    type ChoiceLayout = {
+      label: Phaser.GameObjects.Text;
+      hint?: Phaser.GameObjects.Text;
+      btnH: number;
+    };
+    const layouts: ChoiceLayout[] = choices.map((choice) => {
       const label = this.add
-        .text(x + 18, y + 10, textStr, {
+        .text(0, 0, choice.text, {
           fontFamily: 'Georgia, serif',
           fontSize: '16px',
           color: '#fdf6f3',
+          wordWrap: { width: innerW },
           lineSpacing: 2,
         })
         .setDepth(26);
+      let hint: Phaser.GameObjects.Text | undefined;
       if (choice.hint) {
-        // Style the hint part (second line) differently — hack: split into two texts
-        label.setText(choice.text);
-        const hintLbl = this.add
-          .text(x + 18, y + 32, choice.hint, {
+        hint = this.add
+          .text(0, 0, choice.hint, {
             fontFamily: 'Georgia, serif',
             fontSize: '13px',
             color: '#baa6d4',
             fontStyle: 'italic',
+            wordWrap: { width: innerW },
           })
           .setDepth(26);
-        container.add(hintLbl);
       }
+      const contentH = label.height + (hint ? gapLabelHint + hint.height : 0);
+      const btnH = Math.max(48, contentH + padY * 2);
+      return { label, hint, btnH };
+    });
+
+    // Place stack so it finishes 20px above the top of the dialog box.
+    const totalH =
+      layouts.reduce((sum, l) => sum + l.btnH, 0) + gapBetween * (layouts.length - 1);
+    const dialogTop = height - this.dialogBoxH - 12;
+    let cursorY = Math.max(16, dialogTop - 20 - totalH);
+
+    layouts.forEach((layout, idx) => {
+      const x = (width - btnW) / 2;
+      const y = cursorY;
+      const { btnH, label, hint } = layout;
+
+      const bg = this.add.graphics().setDepth(25);
+      bg.fillStyle(0x1f1630, 0.95);
+      bg.fillRoundedRect(x, y, btnW, btnH, 10);
+      bg.lineStyle(2, 0xcdb4db, 1);
+      bg.strokeRoundedRect(x, y, btnW, btnH, 10);
+
+      label.setPosition(x + padX, y + padY);
+      hint?.setPosition(x + padX, y + padY + label.height + gapLabelHint);
 
       const zone = this.add
-        .zone(x, y, btnW, 56)
+        .zone(x, y, btnW, btnH)
         .setOrigin(0)
         .setInteractive({ useHandCursor: true });
+      const hoverTargets: Phaser.GameObjects.GameObject[] = hint
+        ? [bg, label, hint]
+        : [bg, label];
       zone.on('pointerover', () => {
-        this.tweens.add({ targets: [bg, label], alpha: 0.8, duration: 120 });
+        this.tweens.add({ targets: hoverTargets, alpha: 0.8, duration: 120 });
       });
       zone.on('pointerout', () => {
-        this.tweens.add({ targets: [bg, label], alpha: 1, duration: 120 });
+        this.tweens.add({ targets: hoverTargets, alpha: 1, duration: 120 });
       });
       zone.on('pointerup', () => this.handleChoice(choices, idx));
 
-      container.add([bg, label, zone]);
+      const children: Phaser.GameObjects.GameObject[] = hint
+        ? [bg, label, hint, zone]
+        : [bg, label, zone];
+      container.add(children);
+
+      cursorY += btnH + gapBetween;
     });
 
     this.choicesContainer = container;
@@ -562,36 +595,116 @@ export class RpgScene extends Phaser.Scene {
 
   // ---------------- End of scenario ----------------
 
-  private onScenarioEnded() {
+  private onScenarioEnded(scenario?: Scenario) {
     const { width, height } = this.scale;
-    const overlay = this.add
-      .rectangle(0, 0, width, height, 0x000000, 0)
+    const headline = scenario?.epilogue?.headline ?? `Кінець · ${scenario?.title ?? 'сценарію'}`;
+    const lines = scenario?.epilogue?.lines ?? [];
+
+    // Opaque curtain — fully covers the scene so nothing bleeds through.
+    const curtain = this.add
+      .rectangle(0, 0, width, height, 0x0e0818, 0)
       .setOrigin(0)
       .setDepth(40);
-    this.tweens.add({ targets: overlay, alpha: 0.7, duration: 500 });
+    this.tweens.add({ targets: curtain, alpha: 0.96, duration: 450 });
 
-    this.add
-      .text(width / 2, height / 2 - 30, 'Кінець сценарію', {
+    // Panel geometry: centered, max ~560px wide, capped to 90% of screen.
+    const panelW = Math.min(560, width - 32);
+    const panelX = (width - panelW) / 2;
+    const padX = 22;
+    const padY = 22;
+    const contentW = panelW - padX * 2;
+
+    // Build all text objects first to measure total panel height.
+    const title = this.add
+      .text(0, 0, headline, {
         fontFamily: 'Georgia, serif',
-        fontSize: '28px',
+        fontSize: '26px',
         color: '#cdb4db',
         fontStyle: 'bold',
+        align: 'center',
+        wordWrap: { width: contentW },
       })
-      .setOrigin(0.5)
-      .setDepth(41);
+      .setOrigin(0.5, 0)
+      .setDepth(42)
+      .setAlpha(0);
 
+    const divider = this.add.graphics().setDepth(42).setAlpha(0);
+
+    const lineObjects: Phaser.GameObjects.Text[] = lines.map((text) =>
+      this.add
+        .text(0, 0, text, {
+          fontFamily: 'Georgia, serif',
+          fontSize: '15px',
+          color: '#fdf6f3',
+          wordWrap: { width: contentW },
+          lineSpacing: 4,
+        })
+        .setDepth(42)
+        .setAlpha(0)
+    );
+
+    const btnLabel = '  До меню  ';
     const btn = this.add
-      .text(width / 2, height / 2 + 30, '  До меню  ', {
+      .text(0, 0, btnLabel, {
         fontFamily: 'Georgia, serif',
-        fontSize: '18px',
+        fontSize: '17px',
         color: '#1a1428',
         backgroundColor: '#cdb4db',
-        padding: { left: 14, right: 14, top: 8, bottom: 8 },
+        padding: { left: 18, right: 18, top: 10, bottom: 10 },
       })
-      .setOrigin(0.5)
-      .setDepth(41)
+      .setOrigin(0.5, 0)
+      .setDepth(42)
+      .setAlpha(0)
       .setInteractive({ useHandCursor: true });
     btn.on('pointerup', () => this.scene.start('title'));
+
+    const gapAfterTitle = 14;
+    const dividerH = 10;
+    const gapBetweenLines = 10;
+    const gapBeforeBtn = 24;
+    const linesH = lineObjects.reduce(
+      (sum, l, i) => sum + l.height + (i > 0 ? gapBetweenLines : 0),
+      0
+    );
+    const panelH =
+      padY * 2 + title.height + gapAfterTitle + dividerH + linesH + gapBeforeBtn + btn.height;
+    const panelY = Math.max(24, (height - panelH) / 2);
+
+    // Panel background
+    const panelBg = this.add.graphics().setDepth(41).setAlpha(0);
+    panelBg.fillStyle(0x1a1428, 1);
+    panelBg.fillRoundedRect(panelX, panelY, panelW, panelH, 18);
+    panelBg.lineStyle(3, 0xcdb4db, 1);
+    panelBg.strokeRoundedRect(panelX, panelY, panelW, panelH, 18);
+
+    // Position texts
+    title.setPosition(width / 2, panelY + padY);
+    const dividerY = panelY + padY + title.height + gapAfterTitle;
+    divider.lineStyle(1, 0xcdb4db, 0.4);
+    divider.lineBetween(panelX + padX + 24, dividerY, panelX + panelW - padX - 24, dividerY);
+
+    let cursorY = dividerY + dividerH;
+    lineObjects.forEach((lineObj, i) => {
+      if (i > 0) cursorY += gapBetweenLines;
+      lineObj.setPosition(panelX + padX, cursorY);
+      cursorY += lineObj.height;
+    });
+
+    btn.setPosition(width / 2, cursorY + gapBeforeBtn);
+
+    // Cascade fade-in: panel → title → lines → button
+    this.tweens.add({ targets: panelBg, alpha: 1, duration: 320, delay: 280 });
+    this.tweens.add({ targets: title, alpha: 1, duration: 300, delay: 500 });
+    this.tweens.add({ targets: divider, alpha: 1, duration: 300, delay: 640 });
+    lineObjects.forEach((obj, i) => {
+      this.tweens.add({ targets: obj, alpha: 1, duration: 280, delay: 760 + i * 180 });
+    });
+    this.tweens.add({
+      targets: btn,
+      alpha: 1,
+      duration: 300,
+      delay: 760 + lineObjects.length * 180 + 120,
+    });
 
     this.playSfx('finale');
   }

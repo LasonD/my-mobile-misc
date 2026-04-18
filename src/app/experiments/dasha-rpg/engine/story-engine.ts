@@ -149,7 +149,7 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
 
     // Scenario end
     this.finished = true;
-    this.emit(EngineEvents.ScenarioEnded);
+    this.emit(EngineEvents.ScenarioEnded, this.scenario);
   }
 
   /** Select a visible choice by its array index (as shown in ChoiceShown). */

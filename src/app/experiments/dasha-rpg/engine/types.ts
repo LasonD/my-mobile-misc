@@ -181,6 +181,12 @@ export interface Scenario {
   title: string;
   startNode: NodeId;
   nodes: Record<NodeId, StoryNode>;
+  /**
+   * Shown on the end-of-scenario curtain. First item is the main headline
+   * (e.g. "Кінець першого дня"); the rest are P.S.-style closing beats,
+   * rendered as stacked narrator lines.
+   */
+  epilogue?: { headline: string; lines: string[] };
 }
 
 export interface ScenarioMeta {
