@@ -650,6 +650,130 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       return container;
     },
   },
+
+  apartment_kitchen_evening: {
+    id: 'apartment_kitchen_evening',
+    name: 'Кухня (вечір)',
+    tint: 0xffd79a,
+    build: (scene) => {
+      const { width, height } = scene.scale;
+      const container = scene.add.container(0, 0);
+      // Night sky outside, warm lamp-lit interior on the counter level.
+      container.add(gradientBg(scene, 0x0f0820, 0x1a1028, 0x3a2a1a, 0x5a3a20));
+
+      // Window with night behind it — deep navy with a few distant lights.
+      const winX = width * 0.08;
+      const winY = height * 0.15;
+      const winW = width * 0.28;
+      const winH = height * 0.32;
+
+      const winGlass = scene.add.graphics();
+      winGlass.fillStyle(0x101830, 1);
+      winGlass.fillRect(winX, winY, winW, winH);
+      container.add(winGlass);
+
+      // Scatter a dozen distant city-light pixels.
+      for (let i = 0; i < 12; i++) {
+        const lx = Phaser.Math.Between(winX + 4, winX + winW - 4);
+        const ly = Phaser.Math.Between(winY + 4, winY + winH - 4);
+        const light = scene.add.circle(lx, ly, Phaser.Math.FloatBetween(0.8, 1.4), 0xffcf66, 0.85);
+        container.add(light);
+      }
+
+      const winFrame = scene.add.graphics();
+      winFrame.lineStyle(3, 0x5a4a3a, 1);
+      winFrame.strokeRect(winX, winY, winW, winH);
+      winFrame.beginPath();
+      winFrame.moveTo(winX + winW / 2, winY);
+      winFrame.lineTo(winX + winW / 2, winY + winH);
+      winFrame.moveTo(winX, winY + winH / 2);
+      winFrame.lineTo(winX + winW, winY + winH / 2);
+      winFrame.strokePath();
+      container.add(winFrame);
+
+      // Counter running across the bottom half.
+      const counterY = height * 0.52;
+      const counter = scene.add.graphics();
+      counter.fillStyle(0x4a3020, 1);
+      counter.fillRoundedRect(0, counterY, width, 24, 4);
+      counter.fillStyle(0x6a4a32, 1);
+      counter.fillRoundedRect(0, counterY, width, 6, 4);
+      container.add(counter);
+
+      // Sink.
+      const sinkX = width * 0.55;
+      const sinkW = width * 0.18;
+      const sink = scene.add.graphics();
+      sink.fillStyle(0x1a1410, 1);
+      sink.fillRoundedRect(sinkX, counterY + 3, sinkW, 16, 3);
+      container.add(sink);
+
+      // Kettle.
+      const kettleX = width * 0.38;
+      const kettleY = counterY - 18;
+      const kettleBody = scene.add.circle(kettleX, kettleY, 14, 0x1a1018);
+      const kettleSpout = scene.add.triangle(
+        kettleX - 14,
+        kettleY - 2,
+        0,
+        0,
+        -8,
+        -4,
+        0,
+        6,
+        0x1a1018
+      );
+      const kettleHandle = scene.add.circle(kettleX + 12, kettleY - 6, 4, 0x1a1018);
+      container.add([kettleBody, kettleSpout, kettleHandle]);
+
+      // Desk lamp — silhouette on the right side of the counter.
+      const lampX = width * 0.82;
+      const lampY = counterY - 4;
+      const lampBase = scene.add.rectangle(lampX, lampY, 10, 6, 0x2a1c1a);
+      const lampStem = scene.add.rectangle(lampX, lampY - 14, 3, 22, 0x2a1c1a);
+      const lampShade = scene.add.triangle(
+        lampX,
+        lampY - 30,
+        -14,
+        10,
+        14,
+        10,
+        0,
+        -6,
+        0x3a2428
+      );
+      container.add([lampBase, lampStem, lampShade]);
+
+      // Warm pool of light under the lamp — large soft circle.
+      const lampGlow = scene.add.circle(lampX - 6, counterY + 4, 56, 0xffcf66, 0.22);
+      container.add(lampGlow);
+      scene.tweens.add({
+        targets: lampGlow,
+        alpha: { from: 0.22, to: 0.28 },
+        duration: 2600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      // Wall cabinet — darker than morning variant.
+      const cab = scene.add.graphics();
+      cab.fillStyle(0x4a3020, 1);
+      cab.fillRoundedRect(sinkX - 4, height * 0.22, sinkW + 8, height * 0.22, 4);
+      cab.lineStyle(2, 0x2a1810, 1);
+      cab.strokeRoundedRect(sinkX - 4, height * 0.22, sinkW + 8, height * 0.22, 4);
+      cab.beginPath();
+      cab.moveTo(sinkX - 4 + (sinkW + 8) / 2, height * 0.22);
+      cab.lineTo(sinkX - 4 + (sinkW + 8) / 2, height * 0.44);
+      cab.strokePath();
+      container.add(cab);
+
+      // Floor — dark.
+      addFloor(scene, container, 0x3a2a22, height * 0.78);
+
+      return container;
+    },
+  },
 };
 
 export function getLocation(id: LocationId): LocationDef | null {

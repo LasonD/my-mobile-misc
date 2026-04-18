@@ -32,6 +32,13 @@ export const FLAGS = {
   DOOR_TALK_SERIOUS: 'door_talk_serious',
   LIZA_DOOR_REASON_KNOWN: 'liza_door_reason_known',
   ACT2_DONE: 'second_saturday_act2_done',
+
+  // second_saturday — Act 3
+  OLESYA_OVERWORK_SUSPECTED: 'olesya_overwork_suspected',
+  OLESYA_ASKED_DIRECTLY: 'olesya_asked_directly',
+  OLESYA_IGNORED_OVERWORK: 'olesya_ignored_overwork',
+  OLESYA_LATER_MESSAGE: 'olesya_later_message',
+  SCENARIO_SATURDAY_DONE: 'scenario_saturday_done',
 } as const;
 
 export const STATS = {
