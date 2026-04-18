@@ -133,6 +133,12 @@ export interface CharacterOnStage {
   position: Position;
   emotion?: EmotionId;
   flip?: boolean;
+  /**
+   * If true, the character is shown inside a phone-frame overlay instead of
+   * as a full on-stage sprite — used for video calls. Dasha is still on stage
+   * normally; only the remote character uses this mode.
+   */
+  onPhone?: boolean;
 }
 
 export interface LocationDef {

@@ -39,6 +39,20 @@ export const FLAGS = {
   OLESYA_IGNORED_OVERWORK: 'olesya_ignored_overwork',
   OLESYA_LATER_MESSAGE: 'olesya_later_message',
   SCENARIO_SATURDAY_DONE: 'scenario_saturday_done',
+
+  // second_saturday — local choices (one-node scope, not referenced elsewhere)
+  SATURDAY_QUIET_HUMBLE: 'saturday_quiet_humble',
+  SATURDAY_QUIET_REAL: 'saturday_quiet_real',
+  SATURDAY_QUIET_CHALLENGE: 'saturday_quiet_challenge',
+  SATURDAY_TAZ_PROUD: 'saturday_taz_proud',
+  SATURDAY_TAZ_MODEST: 'saturday_taz_modest',
+  SATURDAY_TAZ_TEASING: 'saturday_taz_teasing',
+  SATURDAY_OLESYA_TIRED: 'saturday_olesya_tired',
+  SATURDAY_OLESYA_MINIMAL: 'saturday_olesya_minimal',
+  SATURDAY_OLESYA_PIVOT: 'saturday_olesya_pivot',
+  SATURDAY_DOORS_ACCEPT: 'saturday_doors_accept',
+  SATURDAY_DOORS_REMIND: 'saturday_doors_remind',
+  SATURDAY_DOORS_OFFER_HUG: 'saturday_doors_offer_hug',
 } as const;
 
 export const STATS = {

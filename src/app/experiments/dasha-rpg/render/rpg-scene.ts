@@ -261,7 +261,9 @@ export class RpgScene extends Phaser.Scene {
           ease: 'Sine.easeInOut',
         });
       } else {
-        const obj = def.render(this, placement.emotion) as Phaser.GameObjects.Container;
+        const obj = placement.onPhone
+          ? this.renderInPhone(def, placement.emotion)
+          : (def.render(this, placement.emotion) as Phaser.GameObjects.Container);
         obj.setPosition(targetX, targetY + 40);
         obj.setAlpha(0);
         obj.setDepth(1);
@@ -275,6 +277,62 @@ export class RpgScene extends Phaser.Scene {
         });
       }
     }
+  }
+
+  /**
+   * Wrap a character sprite inside a phone-frame overlay for video-call
+   * scenes. The phone is anchored at Y=0 (same convention as full sprites),
+   * so the caller places it on the stage line and the phone "stands" upward
+   * to chest-level where the other character is holding it.
+   */
+  private renderInPhone(
+    def: { render: (scene: Phaser.Scene, emotion: string | undefined) => Phaser.GameObjects.GameObject },
+    emotion: string | undefined
+  ): Phaser.GameObjects.Container {
+    const container = this.add.container(0, 0);
+
+    const phoneW = 110;
+    const phoneH = 200;
+    const corner = 14;
+
+    const body = this.add.graphics();
+    body.fillStyle(0x1a1220, 1);
+    body.fillRoundedRect(-phoneW / 2, -phoneH, phoneW, phoneH, corner);
+    body.lineStyle(2, 0x5a4a6a, 1);
+    body.strokeRoundedRect(-phoneW / 2, -phoneH, phoneW, phoneH, corner);
+
+    // Speaker notch on the top bezel.
+    const notchW = 28;
+    body.fillStyle(0x3a2a48, 1);
+    body.fillRoundedRect(-notchW / 2, -phoneH + 7, notchW, 4, 2);
+
+    // Screen inset.
+    const screenInset = 6;
+    const topBezel = 18;
+    const bottomBezel = 14;
+    const screenW = phoneW - screenInset * 2;
+    const screenH = phoneH - topBezel - bottomBezel;
+    const screenX = -screenW / 2;
+    const screenY = -phoneH + topBezel;
+    const screen = this.add.graphics();
+    screen.fillStyle(0x0f0820, 1);
+    screen.fillRect(screenX, screenY, screenW, screenH);
+
+    // Home indicator bar at the bottom bezel.
+    body.fillStyle(0x5a4a6a, 0.7);
+    body.fillRoundedRect(-20, -bottomBezel + 5, 40, 3, 1.5);
+
+    container.add([body, screen]);
+
+    // Character sprite inside the screen, scaled down. Sprites are bottom-
+    // center anchored, so place feet at the bottom of the screen area.
+    const charSprite = def.render(this, emotion) as Phaser.GameObjects.Container;
+    const scale = 0.62;
+    charSprite.setScale(scale);
+    charSprite.setPosition(0, screenY + screenH - 6);
+    container.add(charSprite);
+
+    return container;
   }
 
   private slideOut(obj: Phaser.GameObjects.Container) {

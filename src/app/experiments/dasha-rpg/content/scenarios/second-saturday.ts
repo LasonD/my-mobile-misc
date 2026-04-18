@@ -188,7 +188,48 @@ export const SECOND_SATURDAY: Scenario = {
         { speaker: 'liza', text: 'Добрий ранок. Хоча для мене зараз — ніч.' },
         { speaker: 'liza', text: 'Я чула — не вмикала машину.' },
         { speaker: 'liza', text: 'Ціню.' },
-        { speaker: 'dasha', text: '(нічого. правда.)' },
+      ],
+      choices: [
+        {
+          text: 'Нічого. Правда.',
+          next: 'quiet_morning_response',
+          effects: [fx.flag(FLAGS.SATURDAY_QUIET_HUMBLE)],
+        },
+        {
+          text: 'Весь ранок думала, ставити чи ні.',
+          next: 'quiet_morning_response',
+          effects: [fx.flag(FLAGS.SATURDAY_QUIET_REAL)],
+        },
+        {
+          text: 'А ти сама б так зробила?',
+          next: 'quiet_morning_response',
+          effects: [fx.flag(FLAGS.SATURDAY_QUIET_CHALLENGE)],
+        },
+      ],
+    },
+
+    quiet_morning_response: {
+      location: 'apartment_kitchen',
+      characters: [
+        { id: 'dasha', position: 'left' },
+        { id: 'liza', position: 'right' },
+      ],
+      dialogue: [
+        {
+          condition: cond.flag(FLAGS.SATURDAY_QUIET_HUMBLE),
+          speaker: 'liza',
+          text: 'Добре. Твоя доброта — моя недоспана година.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_QUIET_REAL),
+          speaker: 'liza',
+          text: 'Ха. Я це бачу по тому, як ти голову від ноута не підіймаєш.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_QUIET_CHALLENGE),
+          speaker: 'liza',
+          text: 'Якщо б у мені був твій ранок — так. А з моїм — ні.',
+        },
         { speaker: 'narrator', text: 'Ліза йде в туалет.' },
       ],
       next: 'kitchen_together',
@@ -227,6 +268,48 @@ export const SECOND_SATURDAY: Scenario = {
         {
           speaker: 'liza',
           text: 'Я повинна це записати. «День, коли Даша Гак прала руками в березні 2026.»',
+        },
+      ],
+      choices: [
+        {
+          text: 'Запиши. Тільки курсив.',
+          next: 'amused_liza_close',
+          effects: [fx.flag(FLAGS.SATURDAY_TAZ_PROUD)],
+        },
+        {
+          text: 'Не треба. Це ж нічого.',
+          next: 'amused_liza_close',
+          effects: [fx.flag(FLAGS.SATURDAY_TAZ_MODEST)],
+        },
+        {
+          text: 'Якщо запишеш — я запишу, скільки разів ти казала «я кину Ретровіль».',
+          next: 'amused_liza_close',
+          effects: [fx.flag(FLAGS.SATURDAY_TAZ_TEASING)],
+        },
+      ],
+    },
+
+    amused_liza_close: {
+      location: 'apartment_kitchen',
+      characters: [
+        { id: 'dasha', position: 'left' },
+        { id: 'liza', position: 'right' },
+      ],
+      dialogue: [
+        {
+          condition: cond.flag(FLAGS.SATURDAY_TAZ_PROUD),
+          speaker: 'liza',
+          text: 'Звісно курсив. Це ж історія.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_TAZ_MODEST),
+          speaker: 'liza',
+          text: '«Нічого» — це коли ти робиш одне і те ж. А ти — ні.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_TAZ_TEASING),
+          speaker: 'liza',
+          text: 'Добре. Всі мовчимо. Я не писала. Ти не прала.',
         },
         {
           speaker: 'narrator',
@@ -391,6 +474,48 @@ export const SECOND_SATURDAY: Scenario = {
         { speaker: 'liza', text: '...' },
         { speaker: 'liza', text: 'Іди-но. Я тебе обійму. Я цього не вмію. Але обійму.' },
       ],
+      choices: [
+        {
+          text: 'Ок.',
+          next: 'liza_inattention_close',
+          effects: [fx.flag(FLAGS.SATURDAY_DOORS_ACCEPT)],
+        },
+        {
+          text: 'Я тобі нагадаю. Без жартів.',
+          next: 'liza_inattention_close',
+          effects: [fx.flag(FLAGS.SATURDAY_DOORS_REMIND)],
+        },
+        {
+          text: 'Іди сюди. Я тебе обійму, не ти мене.',
+          next: 'liza_inattention_close',
+          effects: [fx.flag(FLAGS.SATURDAY_DOORS_OFFER_HUG)],
+        },
+      ],
+    },
+
+    liza_inattention_close: {
+      location: 'apartment_kitchen',
+      characters: [
+        { id: 'dasha', position: 'left' },
+        { id: 'liza', position: 'right' },
+      ],
+      dialogue: [
+        {
+          condition: cond.flag(FLAGS.SATURDAY_DOORS_ACCEPT),
+          speaker: 'liza',
+          text: 'Це «ок» чи це «ок»?',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_DOORS_REMIND),
+          speaker: 'liza',
+          text: 'Приймаю. Щоденник твій — я зрозуміла.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_DOORS_OFFER_HUG),
+          speaker: 'liza',
+          text: 'Ти мене переграла. Роль беру.',
+        },
+      ],
       next: 'act2_end',
     },
 
@@ -446,7 +571,7 @@ export const SECOND_SATURDAY: Scenario = {
       location: 'apartment_kitchen_evening',
       characters: [
         { id: 'dasha', position: 'far-left' },
-        { id: 'olesia', position: 'center' },
+        { id: 'olesia', position: 'center', onPhone: true },
         { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
@@ -460,11 +585,51 @@ export const SECOND_SATURDAY: Scenario = {
         { speaker: 'dasha', text: 'Привіт. Ти як?' },
         { speaker: 'olesia', text: 'Живу. Закрила трьох кандидатів, йду на четвертого. Побачимо.' },
         { speaker: 'olesia', text: 'Ти як?' },
-        { speaker: 'dasha', text: 'Курсова. 87 джерел, 88-ме наснилось.' },
+      ],
+      choices: [
         {
-          speaker: 'olesia',
-          text: 'О, моя економічна душа тремтить. Я колись покажу тобі свій Excel по годинах сну.',
+          text: 'Курсова. 87 джерел, 88-ме наснилось.',
+          next: 'olesya_call_response',
+          effects: [fx.flag(FLAGS.SATURDAY_OLESYA_TIRED)],
         },
+        {
+          text: 'Не знаю. Живу.',
+          next: 'olesya_call_response',
+          effects: [fx.flag(FLAGS.SATURDAY_OLESYA_MINIMAL)],
+        },
+        {
+          text: 'А ти? Ні, не питай мене, я про тебе.',
+          next: 'olesya_call_response',
+          effects: [fx.flag(FLAGS.SATURDAY_OLESYA_PIVOT)],
+        },
+      ],
+    },
+
+    olesya_call_response: {
+      location: 'apartment_kitchen_evening',
+      characters: [
+        { id: 'dasha', position: 'far-left' },
+        { id: 'olesia', position: 'center', onPhone: true },
+        { id: 'liza', position: 'far-right' },
+      ],
+      dialogue: [
+        {
+          condition: cond.flag(FLAGS.SATURDAY_OLESYA_TIRED),
+          speaker: 'olesia',
+          text: 'О, моя економічна душа тремтить.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_OLESYA_MINIMAL),
+          speaker: 'olesia',
+          text: 'Перший раз чую «живу» таким тоном. Нотатка зроблена.',
+        },
+        {
+          condition: cond.flag(FLAGS.SATURDAY_OLESYA_PIVOT),
+          speaker: 'olesia',
+          text: 'Дашка, ти мене на дзвінку переорієнтувала. Респект.',
+        },
+        // Excel-жарт зберігаємо як common beat — надто хороший характер-момент Олесі.
+        { speaker: 'olesia', text: 'Я колись покажу тобі свій Excel по годинах сну.' },
         { speaker: 'olesia', text: 'Жах. Але структура — бог.' },
       ],
       next: 'liza_notices',
@@ -474,7 +639,7 @@ export const SECOND_SATURDAY: Scenario = {
       location: 'apartment_kitchen_evening',
       characters: [
         { id: 'dasha', position: 'far-left' },
-        { id: 'olesia', position: 'center' },
+        { id: 'olesia', position: 'center', onPhone: true },
         { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
@@ -508,7 +673,7 @@ export const SECOND_SATURDAY: Scenario = {
       location: 'apartment_kitchen_evening',
       characters: [
         { id: 'dasha', position: 'far-left' },
-        { id: 'olesia', position: 'center' },
+        { id: 'olesia', position: 'center', onPhone: true },
         { id: 'liza', position: 'far-right' },
       ],
       onEnter: [fx.flag(FLAGS.OLESYA_OVERWORK_SUSPECTED)],
@@ -538,7 +703,7 @@ export const SECOND_SATURDAY: Scenario = {
       location: 'apartment_kitchen_evening',
       characters: [
         { id: 'dasha', position: 'far-left' },
-        { id: 'olesia', position: 'center' },
+        { id: 'olesia', position: 'center', onPhone: true },
         { id: 'liza', position: 'far-right' },
       ],
       dialogue: [
