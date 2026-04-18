@@ -1,4 +1,5 @@
 import { cond } from '../../engine/evaluators';
+import { QUESTS } from '../../engine/keys';
 import { Scenario, ScenarioId, ScenarioMeta, ScenarioRegistration } from '../../engine/types';
 import { FIRST_DAY } from './first-day';
 
@@ -24,7 +25,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioRegistration> = {
       order: 1,
       description: 'Спогад про перший день у КШЕ. Два роки тому, 8:42, вул. Шпака, 3.',
       icon: '\u{1F4D6}', // 📖 (book — flashback)
-      done: cond.questDone('first_day'),
+      done: cond.questDone(QUESTS.FIRST_DAY),
     },
   },
 };

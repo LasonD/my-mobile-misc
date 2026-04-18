@@ -79,6 +79,7 @@ export type Condition =
   | { kind: 'visited'; node: NodeId }
   | { kind: 'quest_active'; quest: QuestId }
   | { kind: 'quest_completed'; quest: QuestId }
+  | { kind: 'quest_objective_done'; quest: QuestId; objective: string }
   | { kind: 'all'; of: Condition[] }
   | { kind: 'any'; of: Condition[] }
   | { kind: 'not'; of: Condition };
@@ -150,6 +151,11 @@ export interface DialogueLine {
   text: string;
   emotion?: EmotionId;
   effects?: Effect[];
+  /**
+   * If present and false at the moment of node entry, this line is skipped.
+   * Lets a single node carry reactive dialogue without spawning redirect nodes.
+   */
+  condition?: Condition;
 }
 
 export interface Choice {

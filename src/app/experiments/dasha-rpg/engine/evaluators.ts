@@ -1,3 +1,4 @@
+import type { KnownFlag, KnownObjective, KnownQuest, KnownStat } from './keys';
 import type { Condition, Effect, GameState, NodeId } from './types';
 
 /** Evaluate a condition against the current game state. */
@@ -18,6 +19,8 @@ export function evaluate(cond: Condition | undefined, state: GameState): boolean
       return state.quests[cond.quest]?.state === 'active';
     case 'quest_completed':
       return state.quests[cond.quest]?.state === 'completed';
+    case 'quest_objective_done':
+      return state.quests[cond.quest]?.completedObjectives.has(cond.objective) ?? false;
     case 'all':
       return cond.of.every((c) => evaluate(c, state));
     case 'any':
@@ -106,21 +109,25 @@ export function applyAll(effects: Effect[] | undefined, state: GameState): Effec
   return effects.map((e) => apply(e, state));
 }
 
-/** Small helpers for authoring scenarios with less noise. */
+/**
+ * Authoring helpers. Arguments are typed against the key registries in
+ * `./keys` — a misspelled flag/stat/quest/objective fails at compile time
+ * rather than silently evaluating to `false` at runtime.
+ */
 export const fx = {
-  flag: (flag: string, value = true): Effect => ({ kind: 'set_flag', flag, value }),
-  clearFlag: (flag: string): Effect => ({ kind: 'clear_flag', flag }),
-  stat: (stat: string, delta: number): Effect => ({ kind: 'add_stat', stat, delta }),
-  setStat: (stat: string, value: number): Effect => ({ kind: 'set_stat', stat, value }),
+  flag: (flag: KnownFlag, value = true): Effect => ({ kind: 'set_flag', flag, value }),
+  clearFlag: (flag: KnownFlag): Effect => ({ kind: 'clear_flag', flag }),
+  stat: (stat: KnownStat, delta: number): Effect => ({ kind: 'add_stat', stat, delta }),
+  setStat: (stat: KnownStat, value: number): Effect => ({ kind: 'set_stat', stat, value }),
   setVar: (key: string, value: string | number): Effect => ({ kind: 'set_var', key, value }),
-  startQuest: (quest: string): Effect => ({ kind: 'start_quest', quest }),
-  objective: (quest: string, objective: string): Effect => ({
+  startQuest: (quest: KnownQuest): Effect => ({ kind: 'start_quest', quest }),
+  objective: (quest: KnownQuest, objective: KnownObjective): Effect => ({
     kind: 'complete_objective',
     quest,
     objective,
   }),
-  completeQuest: (quest: string): Effect => ({ kind: 'complete_quest', quest }),
-  failQuest: (quest: string): Effect => ({ kind: 'fail_quest', quest }),
+  completeQuest: (quest: KnownQuest): Effect => ({ kind: 'complete_quest', quest }),
+  failQuest: (quest: KnownQuest): Effect => ({ kind: 'fail_quest', quest }),
   sound: (sound: Effect extends { kind: 'play_sound'; sound: infer S } ? S : never): Effect => ({
     kind: 'play_sound',
     sound,
@@ -128,13 +135,18 @@ export const fx = {
 };
 
 export const cond = {
-  flag: (flag: string, value = true): Condition => ({ kind: 'flag', flag, value }),
-  statGte: (stat: string, value: number): Condition => ({ kind: 'stat_gte', stat, value }),
-  statLte: (stat: string, value: number): Condition => ({ kind: 'stat_lte', stat, value }),
-  statEq: (stat: string, value: number): Condition => ({ kind: 'stat_eq', stat, value }),
+  flag: (flag: KnownFlag, value = true): Condition => ({ kind: 'flag', flag, value }),
+  statGte: (stat: KnownStat, value: number): Condition => ({ kind: 'stat_gte', stat, value }),
+  statLte: (stat: KnownStat, value: number): Condition => ({ kind: 'stat_lte', stat, value }),
+  statEq: (stat: KnownStat, value: number): Condition => ({ kind: 'stat_eq', stat, value }),
   visited: (node: NodeId): Condition => ({ kind: 'visited', node }),
-  questActive: (quest: string): Condition => ({ kind: 'quest_active', quest }),
-  questDone: (quest: string): Condition => ({ kind: 'quest_completed', quest }),
+  questActive: (quest: KnownQuest): Condition => ({ kind: 'quest_active', quest }),
+  questDone: (quest: KnownQuest): Condition => ({ kind: 'quest_completed', quest }),
+  objectiveDone: (quest: KnownQuest, objective: KnownObjective): Condition => ({
+    kind: 'quest_objective_done',
+    quest,
+    objective,
+  }),
   all: (...of: Condition[]): Condition => ({ kind: 'all', of }),
   any: (...of: Condition[]): Condition => ({ kind: 'any', of }),
   not: (of: Condition): Condition => ({ kind: 'not', of }),

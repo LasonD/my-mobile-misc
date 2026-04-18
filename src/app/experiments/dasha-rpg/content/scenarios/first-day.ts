@@ -1,4 +1,5 @@
 import { fx } from '../../engine/evaluators';
+import { FLAGS, OBJECTIVES, QUESTS, STATS } from '../../engine/keys';
 import { Scenario } from '../../engine/types';
 
 /**
@@ -8,7 +9,7 @@ import { Scenario } from '../../engine/types';
  * (Милованов, Брік, Case Champ, "Що? Де? Коли?", Houston MA).
  */
 export const FIRST_DAY: Scenario = {
-  id: 'first_day',
+  id: QUESTS.FIRST_DAY,
   title: 'Пролог · Як усе почалось',
   startNode: 'arrival',
   nodes: {
@@ -16,7 +17,7 @@ export const FIRST_DAY: Scenario = {
     arrival: {
       location: 'kse_entrance',
       characters: [{ id: 'dasha', position: 'center' }],
-      onEnter: [fx.startQuest('first_day'), fx.setStat('charisma', 5), fx.setStat('stress', 2)],
+      onEnter: [fx.startQuest(QUESTS.FIRST_DAY), fx.setStat(STATS.CHARISMA, 5), fx.setStat(STATS.STRESS, 2)],
       dialogue: [
         { speaker: 'narrator', text: '*Спогад. Два роки тому.*' },
         { speaker: 'narrator', text: '8:42 ранку. Київ. Вул. Шпака, 3.' },
@@ -28,19 +29,19 @@ export const FIRST_DAY: Scenario = {
         {
           text: 'Зробити селфі на вході для Instagram',
           next: 'selfie',
-          effects: [fx.stat('charisma', 1), fx.flag('posted_selfie')],
+          effects: [fx.stat(STATS.CHARISMA, 1), fx.flag(FLAGS.POSTED_SELFIE)],
           hint: 'Студентський рефлекс',
         },
         {
           text: 'Подзвонити мамі',
           next: 'call_mom',
-          effects: [fx.stat('stress', -1)],
+          effects: [fx.stat(STATS.STRESS, -1)],
           hint: 'Заспокоїтись',
         },
         {
           text: 'Просто зайти',
           next: 'enter_lobby',
-          effects: [fx.stat('charisma', 1)],
+          effects: [fx.stat(STATS.CHARISMA, 1)],
           hint: 'По-діловому',
         },
       ],
@@ -85,18 +86,18 @@ export const FIRST_DAY: Scenario = {
         {
           text: '"Психологія."',
           next: 'security_psy',
-          effects: [fx.flag('said_psychology')],
+          effects: [fx.flag(FLAGS.SAID_PSYCHOLOGY)],
         },
         {
           text: '"Сексологія."',
           next: 'security_sex',
-          effects: [fx.flag('bold_intro'), fx.stat('charisma', 2)],
+          effects: [fx.flag(FLAGS.BOLD_INTRO), fx.stat(STATS.CHARISMA, 2)],
           hint: 'Сміливо. Подивимось на реакцію.',
         },
         {
           text: '"Економіка… ну, майже."',
           next: 'security_maybe',
-          effects: [fx.stat('stress', 1)],
+          effects: [fx.stat(STATS.STRESS, 1)],
           hint: 'Ніколи не бреши охоронцю.',
         },
       ],
@@ -113,7 +114,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'security', text: 'І… не лякайтесь професорки Коваленко. Вона жорстка, але справедлива.' },
         { speaker: 'dasha', text: 'Дякую!' },
       ],
-      onExit: [fx.objective('first_day', 'pass_security')],
+      onExit: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.PASS_SECURITY)],
       next: 'lobby_yasya',
     },
 
@@ -130,7 +131,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'security', text: 'Перший раз таке чую на вході. Зате точно не забуду ваше обличчя.' },
         { speaker: 'security', text: 'Третій поверх. Ліфт праворуч.' },
       ],
-      onExit: [fx.objective('first_day', 'pass_security'), fx.stat('reputation', 1)],
+      onExit: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.PASS_SECURITY), fx.stat(STATS.REPUTATION, 1)],
       next: 'lobby_yasya',
     },
 
@@ -146,7 +147,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'dasha', text: 'Психологія. Вибачте.' },
         { speaker: 'security', text: 'Третій поверх.' },
       ],
-      onExit: [fx.objective('first_day', 'pass_security')],
+      onExit: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.PASS_SECURITY)],
       next: 'lobby_yasya',
     },
 
@@ -166,12 +167,12 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'yasya', text: 'Ні. Сьогодні в тебе є старша подруга з картою КШЕ в голові.' },
         { speaker: 'yasya', text: 'До речі — Милованов нібито виступатиме з привітальним словом. І Брік теж.' },
       ],
-      onEnter: [fx.objective('first_day', 'meet_yasya')],
+      onEnter: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.MEET_YASYA)],
       choices: [
         {
           text: '"Покажи мені аудиторію 301."',
           next: 'heading_to_lecture',
-          effects: [fx.flag('teamed_with_yasya')],
+          effects: [fx.flag(FLAGS.TEAMED_WITH_YASYA)],
         },
         {
           text: '"А що там на дошці оголошень?"',
@@ -181,7 +182,7 @@ export const FIRST_DAY: Scenario = {
         {
           text: '"Кава перед першою парою?"',
           next: 'cafe_break_early',
-          effects: [fx.stat('stress', -1), fx.flag('coffee_first')],
+          effects: [fx.stat(STATS.STRESS, -1), fx.flag(FLAGS.COFFEE_FIRST)],
         },
       ],
     },
@@ -236,7 +237,7 @@ export const FIRST_DAY: Scenario = {
         { speaker: 'narrator', text: 'На дошці вже виведена формула корисності. Бо КШЕ.' },
         { speaker: 'dasha', text: '(глибокий вдих)' },
       ],
-      onEnter: [fx.objective('first_day', 'attend_lecture')],
+      onEnter: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.ATTEND_LECTURE)],
       next: 'prof_entrance',
     },
 
@@ -255,7 +256,7 @@ export const FIRST_DAY: Scenario = {
         {
           text: 'Одразу сказати "сексологія"',
           next: 'prof_sex',
-          effects: [fx.flag('public_sex_claim'), fx.stat('reputation', 2)],
+          effects: [fx.flag(FLAGS.PUBLIC_SEX_CLAIM), fx.stat(STATS.REPUTATION, 2)],
           hint: 'Смілива заявка на репутацію',
         },
         {
@@ -266,7 +267,7 @@ export const FIRST_DAY: Scenario = {
         {
           text: 'Пропустити чергу, дати іншим піти першими',
           next: 'prof_wait',
-          effects: [fx.stat('stress', 1)],
+          effects: [fx.stat(STATS.STRESS, 1)],
           hint: 'Виграти час, але потім зайти всіх ходом',
         },
       ],
@@ -321,7 +322,7 @@ export const FIRST_DAY: Scenario = {
         { id: 'dasha', position: 'left' },
         { id: 'yasya', position: 'right' },
       ],
-      onEnter: [fx.objective('first_day', 'survive_day'), fx.completeQuest('first_day')],
+      onEnter: [fx.objective(QUESTS.FIRST_DAY, OBJECTIVES.SURVIVE_DAY), fx.completeQuest(QUESTS.FIRST_DAY)],
       dialogue: [
         { speaker: 'narrator', text: '17:30. День завершився. Перше кафе. Яся вже з лате.' },
         { speaker: 'yasya', text: 'Ну? Жива?' },

@@ -14,6 +14,13 @@ import {
   createInitialState,
 } from './types';
 
+function visibleLines(node: StoryNode, state: GameState): DialogueLine[] {
+  if (!node.dialogue?.length) return [];
+  return node.dialogue.filter((line) =>
+    line.condition ? evaluate(line.condition, state) : true
+  );
+}
+
 /**
  * Rendering-agnostic story state machine.
  * Emits events via Phaser.Events.EventEmitter — subscribe from your scene
@@ -23,6 +30,12 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
   readonly state: GameState;
   private scenario: Scenario | null = null;
   private node: StoryNode | null = null;
+  /**
+   * Dialogue lines of the current node, pre-filtered by their `condition`.
+   * Lines whose condition fails at node-entry time are never shown, so the
+   * engine advances through this array — not through `node.dialogue` directly.
+   */
+  private visibleDialogue: DialogueLine[] = [];
   private lineIndex = 0;
   private waitingForChoice = false;
   private finished = false;
@@ -76,6 +89,10 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
     this.state.history.push(id);
     this.lineIndex = 0;
     this.waitingForChoice = false;
+    // Snapshot visible dialogue at entry time. Effects applied to lines while
+    // advancing can change state, but we don't re-evaluate — otherwise a line
+    // could disappear mid-flow.
+    this.visibleDialogue = visibleLines(node, this.state);
 
     // Anyone on stage in this node counts as "met" for the directory.
     if (node.characters) {
@@ -96,14 +113,16 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
       this.emit(EngineEvents.CharactersChanged, node.characters);
     }
 
-    // If node has dialogue, show first line. Otherwise, treat dialogue as done.
-    if (node.dialogue && node.dialogue.length > 0) {
+    // If any visible dialogue survives the filter, show its first line.
+    // Otherwise, treat dialogue as done (the node jumps to choices/next).
+    if (this.visibleDialogue.length > 0) {
+      const first = this.visibleDialogue[0];
       this.emit(EngineEvents.LineShown, {
-        line: node.dialogue[0],
+        line: first,
         index: 0,
-        total: node.dialogue.length,
+        total: this.visibleDialogue.length,
       });
-      this.applyEffects(node.dialogue[0].effects);
+      this.applyEffects(first.effects);
     } else {
       this.onDialogueFinished();
     }
@@ -118,10 +137,10 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
     if (!this.node || this.finished) return;
     if (this.waitingForChoice) return;
 
-    const total = this.node.dialogue?.length ?? 0;
+    const total = this.visibleDialogue.length;
     if (this.lineIndex + 1 < total) {
       this.lineIndex++;
-      const line = this.node.dialogue![this.lineIndex];
+      const line = this.visibleDialogue[this.lineIndex];
       this.emit(EngineEvents.LineShown, {
         line,
         index: this.lineIndex,
