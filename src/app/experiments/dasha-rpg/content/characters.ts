@@ -87,6 +87,15 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     voice: { lang: 'uk-UA', pitch: 1.05, rate: 0.95, volume: 1.0 },
     bio: 'Викладачка психології. Шанує CBT і каву без цукру.',
   },
+  yegor: {
+    id: 'yegor',
+    name: 'Єгор',
+    color: 0x4a6b8c,
+    render: (scene) =>
+      renderEmojiAvatar(scene, { emoji: '\u{1F468}\u200D\u{1F3EB}', ring: 0x4a6b8c, bg: 0xe8eff5 }), // 👨‍🏫
+    voice: { lang: 'uk-UA', pitch: 0.9, rate: 1.0, volume: 1.0 },
+    bio: 'Викладач, співавтор Даши по дослідженню про сексуальну реабілітацію ветеранів. Ідеолог "давай ти все напишеш, я підпишу".',
+  },
   security: {
     id: 'security',
     name: 'Охоронець Петро',
