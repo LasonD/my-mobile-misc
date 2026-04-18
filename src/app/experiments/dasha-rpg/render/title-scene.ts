@@ -380,7 +380,7 @@ export class TitleScene extends Phaser.Scene {
     return evaluate(reg.meta.done, state);
   }
 
-  // ---------- Directory button ----------
+  // ---------- Reset button ----------
 
   private drawResetButton(state: GameState | null) {
     const { width } = this.scale;
@@ -388,10 +388,10 @@ export class TitleScene extends Phaser.Scene {
     const padX = 12;
     const padY = 6;
     const txt = this.add
-      .text(0, 0, '🗑️ Скинути прогрес', {
+      .text(0, 0, '🔄 Скинути', {
         fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Georgia, serif',
         fontSize: '13px',
-        color: 'red',
+        color: '#fdf6f3',
         fontStyle: 'italic',
       })
       .setOrigin(0, 0)
@@ -403,9 +403,9 @@ export class TitleScene extends Phaser.Scene {
     const y = 14;
 
     const bg = this.add.graphics().setDepth(49);
-    bg.fillStyle(0x1a1428, 0.85);
+    bg.fillStyle(0x5c3b4a, 0.85);
     bg.fillRoundedRect(x, y, bw, bh, 8);
-    bg.lineStyle(1.5, 0xcdb4db, 0.85);
+    bg.lineStyle(1.5, 0xe8724a, 0.85);
     bg.strokeRoundedRect(x, y, bw, bh, 8);
 
     txt.setPosition(x + padX, y + padY);
@@ -417,23 +417,140 @@ export class TitleScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     zone.on('pointerover', () => {
       bg.clear();
-      bg.fillStyle(0x3a2a4a, 0.95);
+      bg.fillStyle(0x6c4a5a, 0.95);
       bg.fillRoundedRect(x, y, bw, bh, 8);
-      bg.lineStyle(1.5, 0xcdb4db, 1);
+      bg.lineStyle(1.5, 0xf09050, 1);
       bg.strokeRoundedRect(x, y, bw, bh, 8);
     });
     zone.on('pointerout', () => {
       bg.clear();
-      bg.fillStyle(0x1a1428, 0.85);
+      bg.fillStyle(0x5c3b4a, 0.85);
       bg.fillRoundedRect(x, y, bw, bh, 8);
-      bg.lineStyle(1.5, 0xcdb4db, 0.85);
+      bg.lineStyle(1.5, 0xe8724a, 0.85);
       bg.strokeRoundedRect(x, y, bw, bh, 8);
     });
     zone.on('pointerup', () => {
       this.sfx.pop();
+      this.showResetConfirmation();
+    });
+  }
+
+  private showResetConfirmation() {
+    const { width, height } = this.scale;
+    const modalW = Math.min(320, width - 32);
+    const modalH = 140;
+    const modalX = (width - modalW) / 2;
+    const modalY = (height - modalH) / 2;
+
+    const overlay = this.add
+      .rectangle(0, 0, width, height, 0x000000, 0.6)
+      .setOrigin(0)
+      .setDepth(100)
+      .setInteractive();
+
+    const bg = this.add.graphics().setDepth(101);
+    bg.fillStyle(0x2a1c3a, 0.95);
+    bg.fillRoundedRect(modalX, modalY, modalW, modalH, 12);
+    bg.lineStyle(2, 0xcdb4db, 1);
+    bg.strokeRoundedRect(modalX, modalY, modalW, modalH, 12);
+
+    const title = this.add
+      .text(width / 2, modalY + 20, 'Очистити прогрес?', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '16px',
+        color: '#fdf6f3',
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setDepth(102);
+
+    const message = this.add
+      .text(width / 2, modalY + 50, 'Це видалить усі збережені дані.', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '12px',
+        color: '#baa6d4',
+      })
+      .setOrigin(0.5)
+      .setDepth(102);
+
+    const btnW = 70;
+    const btnH = 32;
+    const btnY = modalY + 85;
+    const btnGap = 10;
+    const cancelX = (width - (btnW * 2 + btnGap)) / 2;
+    const confirmX = cancelX + btnW + btnGap;
+
+    this.createModalButton(cancelX, btnY, btnW, btnH, 'Скасувати', 0x3a2a4a, 0xcdb4db, () => {
+      overlay.destroy();
+      bg.destroy();
+      title.destroy();
+      message.destroy();
+    });
+
+    this.createModalButton(confirmX, btnY, btnW, btnH, 'Так', 0x5c3b4a, 0xe8724a, () => {
+      overlay.destroy();
+      bg.destroy();
+      title.destroy();
+      message.destroy();
+      this.sfx.pop();
       this.factTimer?.remove();
       SaveManager.clear();
       this.scene.start('title');
+    });
+  }
+
+  private createModalButton(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    label: string,
+    bgColor: number,
+    borderColor: number,
+    onClick: () => void
+  ) {
+    const btnBg = this.add.graphics().setDepth(102);
+    btnBg.fillStyle(bgColor, 0.8);
+    btnBg.fillRoundedRect(x, y, w, h, 6);
+    btnBg.lineStyle(1, borderColor, 0.8);
+    btnBg.strokeRoundedRect(x, y, w, h, 6);
+
+    const btnText = this.add
+      .text(x + w / 2, y + h / 2, label, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '12px',
+        color: '#fdf6f3',
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setDepth(103);
+
+    const zone = this.add
+      .zone(x, y, w, h)
+      .setOrigin(0)
+      .setDepth(104)
+      .setInteractive({ useHandCursor: true });
+
+    zone.on('pointerover', () => {
+      btnBg.clear();
+      btnBg.fillStyle(bgColor, 1);
+      btnBg.fillRoundedRect(x, y, w, h, 6);
+      btnBg.lineStyle(1.5, borderColor, 1);
+      btnBg.strokeRoundedRect(x, y, w, h, 6);
+    });
+
+    zone.on('pointerout', () => {
+      btnBg.clear();
+      btnBg.fillStyle(bgColor, 0.8);
+      btnBg.fillRoundedRect(x, y, w, h, 6);
+      btnBg.lineStyle(1, borderColor, 0.8);
+      btnBg.strokeRoundedRect(x, y, w, h, 6);
+    });
+
+    zone.on('pointerup', () => {
+      btnBg.destroy();
+      btnText.destroy();
+      onClick();
     });
   }
 
