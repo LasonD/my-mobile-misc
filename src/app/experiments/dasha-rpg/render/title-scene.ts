@@ -12,6 +12,31 @@ import { buildDashaTextures } from '../../dasha/scenes/dasha-sprite';
 import { evaluate } from '../engine/evaluators';
 
 const FACT_INTERVAL_MS = 11000;
+const TITLE_INTERVAL_MS = 30000;
+
+const TITLE_VARIANTS: string[] = [
+  'Даша: як це було',
+  'Даша: як воно все',
+  'Дашині дні',
+  'Привіт, я Даша',
+  'Ось Даша',
+  'Даша, коли ніхто не дивиться',
+  'Щось про Дашу',
+  'Даша: джерело № 88',
+  'Дашині хроніки',
+  'З Дашиного щоденника',
+];
+
+const SUBTITLE_VARIANTS: string[] = [
+  'Київ. Люди. Сексологія. І не тільки :)',
+  'Лекції. Село. Курсова. Друзі.',
+  'Квартира. Кіт. Кава. 87 джерел.',
+  'Третій курс. Практика. Курсова. Вижити.',
+  'Ранок. Дзвінок з США. Обійми. Повторити.',
+  'Даша. Як вона є. Без зайвого.',
+  'Психологія. Сексологія. І ще трошки.',
+  'Не серіал. Не кіно. Просто суботи.',
+];
 
 export class TitleScene extends Phaser.Scene {
   private sfx = new SoftSounds();
@@ -19,6 +44,14 @@ export class TitleScene extends Phaser.Scene {
   private factTimer?: Phaser.Time.TimerEvent;
   private factOrder: number[] = [];
   private factCursor = 0;
+  private titleText?: Phaser.GameObjects.Text;
+  private titleTimer?: Phaser.Time.TimerEvent;
+  private titleOrder: number[] = [];
+  private titleCursor = 0;
+  private subtitleText?: Phaser.GameObjects.Text;
+  private subtitleTimer?: Phaser.Time.TimerEvent;
+  private subtitleOrder: number[] = [];
+  private subtitleCursor = 0;
   private themePlayer?: AmbientPlayer;
 
   constructor() {
@@ -32,6 +65,8 @@ export class TitleScene extends Phaser.Scene {
   create() {
     buildDashaTextures(this);
     this.factOrder = this.shuffledIndices(TITLE_FACTS.length);
+    this.titleOrder = this.shuffledIndices(TITLE_VARIANTS.length);
+    this.subtitleOrder = this.shuffledIndices(SUBTITLE_VARIANTS.length);
 
     this.drawBackground();
     this.drawSparkles();
@@ -58,6 +93,8 @@ export class TitleScene extends Phaser.Scene {
       this.sfx.dispose();
       this.themePlayer?.dispose();
       this.factTimer?.remove();
+      this.titleTimer?.remove();
+      this.subtitleTimer?.remove();
       this.scale.off('resize', this.onResize, this);
     });
   }
@@ -104,8 +141,13 @@ export class TitleScene extends Phaser.Scene {
     // doesn't crowd it, but not so much that the title floats in the middle.
     const y = Math.max(58, height * (narrow ? 0.11 : 0.12));
 
-    const title = this.add
-      .text(cx, y, 'Даша: як це було', {
+    // Pick the first title from the shuffled order; subsequent rotations
+    // happen via `rotateTitle` on a 30-second interval.
+    const firstTitle = TITLE_VARIANTS[this.titleOrder[this.titleCursor % this.titleOrder.length]];
+    this.titleCursor++;
+
+    this.titleText = this.add
+      .text(cx, y, firstTitle, {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '34px' : '45px',
         color: '#ffd36a',
@@ -115,14 +157,29 @@ export class TitleScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const sub = this.add
-      .text(cx, y + title.height * 0.7, 'Київ. Люди. Сексологія. І не тільки :)', {
+    const firstSubtitle = SUBTITLE_VARIANTS[this.subtitleOrder[this.subtitleCursor % this.subtitleOrder.length]];
+    this.subtitleCursor++;
+
+    this.subtitleText = this.add
+      .text(cx, y + this.titleText.height * 0.7, firstSubtitle, {
         fontFamily: 'Georgia, serif',
         fontSize: narrow ? '16px' : '20px',
         color: '#cdb4db',
         fontStyle: 'italic',
       })
       .setOrigin(0.5);
+    const sub = this.subtitleText;
+
+    this.titleTimer = this.time.addEvent({
+      delay: TITLE_INTERVAL_MS,
+      loop: true,
+      callback: () => this.rotateTitle(),
+    });
+    this.subtitleTimer = this.time.addEvent({
+      delay: TITLE_INTERVAL_MS,
+      loop: true,
+      callback: () => this.rotateSubtitle(),
+    });
 
     const flourish = this.add.graphics();
     flourish.lineStyle(2, 0xffd36a, 0.8);
@@ -610,6 +667,40 @@ export class TitleScene extends Phaser.Scene {
       onComplete: () => {
         this.factText!.setText(next);
         this.tweens.add({ targets: this.factText, alpha: 1, duration: 500 });
+      },
+    });
+  }
+
+  private rotateTitle() {
+    if (!this.titleText) return;
+    const idx = this.titleOrder[this.titleCursor % this.titleOrder.length];
+    this.titleCursor++;
+    const next = TITLE_VARIANTS[idx];
+
+    this.tweens.add({
+      targets: this.titleText,
+      alpha: 0,
+      duration: 500,
+      onComplete: () => {
+        this.titleText!.setText(next);
+        this.tweens.add({ targets: this.titleText, alpha: 1, duration: 500 });
+      },
+    });
+  }
+
+  private rotateSubtitle() {
+    if (!this.subtitleText) return;
+    const idx = this.subtitleOrder[this.subtitleCursor % this.subtitleOrder.length];
+    this.subtitleCursor++;
+    const next = SUBTITLE_VARIANTS[idx];
+
+    this.tweens.add({
+      targets: this.subtitleText,
+      alpha: 0,
+      duration: 500,
+      onComplete: () => {
+        this.subtitleText!.setText(next);
+        this.tweens.add({ targets: this.subtitleText, alpha: 1, duration: 500 });
       },
     });
   }
