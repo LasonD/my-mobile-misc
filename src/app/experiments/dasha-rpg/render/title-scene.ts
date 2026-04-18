@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 
 import { buildDashaTextures } from '../../dasha/scenes/dasha-sprite';
 import { SoftSounds } from '../../dasha/scenes/soft-sounds';
+import { CHARACTERS } from '../content/characters';
 import { TITLE_FACTS } from '../content/facts';
 import { UPCOMING, listScenarios } from '../content/scenarios/index';
 import { evaluate } from '../engine/evaluators';
@@ -35,6 +36,7 @@ export class TitleScene extends Phaser.Scene {
     this.drawTitle(isNarrow);
     this.drawDasha(isNarrow);
     this.drawLevelSelect(state, isNarrow);
+    this.drawDirectoryButton(state);
     this.drawFactTicker();
 
     this.input.once('pointerdown', () => this.sfx.resume());
@@ -294,6 +296,65 @@ export class TitleScene extends Phaser.Scene {
   private startScenario(id: string, opts: { load: boolean }) {
     this.factTimer?.remove();
     this.scene.start('rpg', { scenarioId: id, load: opts.load });
+  }
+
+  // ---------- Directory button ----------
+
+  private drawDirectoryButton(state: GameState | null) {
+    const { width } = this.scale;
+    const totalChars = Object.keys(CHARACTERS).length;
+    const metCount = state?.metCharacters?.size ?? 0;
+    const label = `👥 Знайомі · ${metCount}/${totalChars}`;
+
+    const padX = 12;
+    const padY = 6;
+    const txt = this.add
+      .text(0, 0, label, {
+        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Georgia, serif',
+        fontSize: '13px',
+        color: '#fdf6f3',
+        fontStyle: 'italic',
+      })
+      .setOrigin(0, 0)
+      .setDepth(50);
+
+    const bw = txt.width + padX * 2;
+    const bh = txt.height + padY * 2;
+    const x = width - bw - 14;
+    const y = 14;
+
+    const bg = this.add.graphics().setDepth(49);
+    bg.fillStyle(0x1a1428, 0.85);
+    bg.fillRoundedRect(x, y, bw, bh, 8);
+    bg.lineStyle(1.5, 0xcdb4db, 0.85);
+    bg.strokeRoundedRect(x, y, bw, bh, 8);
+
+    txt.setPosition(x + padX, y + padY);
+
+    const zone = this.add
+      .zone(x, y, bw, bh)
+      .setOrigin(0)
+      .setDepth(51)
+      .setInteractive({ useHandCursor: true });
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x3a2a4a, 0.95);
+      bg.fillRoundedRect(x, y, bw, bh, 8);
+      bg.lineStyle(1.5, 0xcdb4db, 1);
+      bg.strokeRoundedRect(x, y, bw, bh, 8);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.fillStyle(0x1a1428, 0.85);
+      bg.fillRoundedRect(x, y, bw, bh, 8);
+      bg.lineStyle(1.5, 0xcdb4db, 0.85);
+      bg.strokeRoundedRect(x, y, bw, bh, 8);
+    });
+    zone.on('pointerup', () => {
+      this.sfx.pop();
+      this.factTimer?.remove();
+      this.scene.start('directory');
+    });
   }
 
   private isScenarioDone(state: GameState | null, id: string): boolean {

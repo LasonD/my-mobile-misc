@@ -28,6 +28,11 @@ export interface GameState {
   currentScenario: ScenarioId | null;
   currentNode: NodeId | null;
   history: NodeId[];
+  /**
+   * Characters whose ID has appeared in `node.characters` of any visited node.
+   * Drives the "Знайомі" directory on the title screen.
+   */
+  metCharacters: Set<CharacterId>;
 }
 
 export interface QuestProgress {
@@ -46,6 +51,7 @@ export function createInitialState(): GameState {
     currentScenario: null,
     currentNode: null,
     history: [],
+    metCharacters: new Set(),
   };
 }
 

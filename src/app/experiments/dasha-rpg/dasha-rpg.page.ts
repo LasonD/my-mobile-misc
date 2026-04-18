@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import * as Phaser from 'phaser';
 
+import { DirectoryScene } from './render/directory-scene';
 import { RpgScene } from './render/rpg-scene';
 import { TitleScene } from './render/title-scene';
 
@@ -47,7 +48,7 @@ export class DashaRpgPage implements AfterViewInit, OnDestroy {
         default: 'arcade',
         arcade: { debug: false, gravity: { x: 0, y: 0 } },
       },
-      scene: [TitleScene, RpgScene],
+      scene: [TitleScene, RpgScene, DirectoryScene],
     });
   }
 

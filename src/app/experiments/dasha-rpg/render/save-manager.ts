@@ -17,6 +17,7 @@ interface SerializedState {
   currentScenario: string | null;
   currentNode: string | null;
   history: string[];
+  metCharacters: string[];
   savedAt: number;
 }
 
@@ -49,6 +50,7 @@ export class SaveManager {
         currentScenario: state.currentScenario,
         currentNode: state.currentNode,
         history: state.history.slice(-40),
+        metCharacters: Array.from(state.metCharacters),
         savedAt: Date.now(),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -80,6 +82,7 @@ export class SaveManager {
         currentScenario: parsed.currentScenario ?? null,
         currentNode: parsed.currentNode ?? null,
         history: parsed.history ?? [],
+        metCharacters: new Set(parsed.metCharacters ?? []),
       };
     } catch {
       return null;

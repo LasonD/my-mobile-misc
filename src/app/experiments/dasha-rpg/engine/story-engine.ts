@@ -77,6 +77,13 @@ export class StoryEngine extends Phaser.Events.EventEmitter {
     this.lineIndex = 0;
     this.waitingForChoice = false;
 
+    // Anyone on stage in this node counts as "met" for the directory.
+    if (node.characters) {
+      for (const c of node.characters) {
+        this.state.metCharacters.add(c.id);
+      }
+    }
+
     // Apply onEnter effects
     this.applyEffects(node.onEnter);
 
