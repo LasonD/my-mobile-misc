@@ -53,6 +53,30 @@ export const FLAGS = {
   SATURDAY_DOORS_ACCEPT: 'saturday_doors_accept',
   SATURDAY_DOORS_REMIND: 'saturday_doors_remind',
   SATURDAY_DOORS_OFFER_HUG: 'saturday_doors_offer_hug',
+
+  // third_obukhiv — completion
+  SCENARIO_OBUKHIV_DONE: 'scenario_obukhiv_done',
+
+  // third_obukhiv — local choices (one-node scope)
+  // Тон, яким Даша «приземлює» Сашину тривогу при зустрічі.
+  OBUKHIV_ARRIVAL_WARM: 'obukhiv_arrival_warm',     // пряме «це я, не співбесіда»
+  OBUKHIV_ARRIVAL_TEASE: 'obukhiv_arrival_tease',   // помічає прибирання, тепло
+  OBUKHIV_ARRIVAL_CAT: 'obukhiv_arrival_cat',       // заземлює через Макса
+
+  // Як Даша реагує на «у мене не було стола» — до того, як знаходять Максову платформу.
+  OBUKHIV_TABLE_SOLVE: 'obukhiv_table_solve',       // встає, оглядає, знаходить сама
+  OBUKHIV_TABLE_NORMALIZE: 'obukhiv_table_normalize', // словом нормалізує («дзеркало на стільці»)
+  OBUKHIV_TABLE_TALKCAT: 'obukhiv_table_talkcat',   // звертається до Макса
+
+  // Як Даша зустріне Сашину паніку від проковтнутої грудки васабі.
+  OBUKHIV_WASABI_LAUGH: 'obukhiv_wasabi_laugh',     // відкритий сміх, разом
+  OBUKHIV_WASABI_HELP: 'obukhiv_wasabi_help',       // дія: молоко/кефір
+  OBUKHIV_WASABI_TEASE: 'obukhiv_wasabi_tease',     // м'який жарт «найкращий друг»
+
+  // Як Даша обрамляє «чому» свого подарунка — квитків на «Діалог у темряві».
+  OBUKHIV_GIFT_PRESENT: 'obukhiv_gift_present',     // про нас: «без екранів»
+  OBUKHIV_GIFT_STORY: 'obukhiv_gift_story',         // особиста історія: була у вересні
+  OBUKHIV_GIFT_CURIOUS: 'obukhiv_gift_curious',     // чесно про цікавість: «для мене теж»
 } as const;
 
 export const STATS = {

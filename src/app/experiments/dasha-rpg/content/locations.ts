@@ -774,6 +774,114 @@ export const LOCATIONS: Record<LocationId, LocationDef> = {
       return container;
     },
   },
+
+  obukhiv_apartment_room: {
+    id: 'obukhiv_apartment_room',
+    name: 'Кімната Саши (Обухів)',
+    tint: 0xf0e8d4,
+    build: (scene) => {
+      const { width, height } = scene.scale;
+      const container = scene.add.container(0, 0);
+
+      // Pale winter afternoon — cool sky tone above, warm tan walls below.
+      // 14 February daylight, indoor warmth.
+      container.add(gradientBg(scene, 0xc8d0d8, 0xd4d8e0, 0xe8d8b8, 0xd8c4a0));
+
+      // Window — left side, daylight pouring in.
+      const winX = width * 0.05;
+      const winY = height * 0.15;
+      const winW = width * 0.22;
+      const winH = height * 0.30;
+      const winFrame = scene.add.graphics();
+      winFrame.fillStyle(0xe0e8f0, 1);
+      winFrame.fillRect(winX, winY, winW, winH);
+      winFrame.lineStyle(3, 0x6a5a4a, 1);
+      winFrame.strokeRect(winX, winY, winW, winH);
+      winFrame.beginPath();
+      winFrame.moveTo(winX + winW / 2, winY);
+      winFrame.lineTo(winX + winW / 2, winY + winH);
+      winFrame.moveTo(winX, winY + winH / 2);
+      winFrame.lineTo(winX + winW, winY + winH / 2);
+      winFrame.strokePath();
+      container.add(winFrame);
+
+      // A3-sheet "screen" — back wall, taped together. Slightly off-kilter
+      // grid of 3×2 slightly off-white rectangles. This is the makeshift
+      // projector screen that will fall down at night in the epilogue node.
+      const screenX = width * 0.40;
+      const screenY = height * 0.18;
+      const screenW = width * 0.36;
+      const screenH = height * 0.26;
+      const screen = scene.add.graphics();
+      const cols = 3;
+      const rows = 2;
+      const cellW = screenW / cols;
+      const cellH = screenH / rows;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          screen.fillStyle(0xf6f0e2, 1);
+          screen.fillRect(
+            screenX + c * cellW + 1,
+            screenY + r * cellH + 1,
+            cellW - 2,
+            cellH - 2
+          );
+        }
+      }
+      container.add(screen);
+
+      // Tape blobs at the corners — small darker beige squares.
+      const tape = scene.add.graphics();
+      tape.fillStyle(0xd4c8a4, 0.85);
+      const tapeCorners: Array<[number, number]> = [
+        [screenX - 2, screenY - 2],
+        [screenX + screenW - 6, screenY - 2],
+        [screenX - 2, screenY + screenH - 6],
+        [screenX + screenW - 6, screenY + screenH - 6],
+      ];
+      for (const [tx, ty] of tapeCorners) {
+        tape.fillRect(tx, ty, 8, 8);
+      }
+      container.add(tape);
+
+      // Cat-house — far-right corner. Two parts: tall body with circular
+      // entrance hole, and a flat platform on top (which becomes the
+      // improvised dinner table in `table_problem`).
+      const chBaseX = width * 0.78;
+      const chTopY = height * 0.40;
+      const chW = 50;
+      const chH = 60;
+      const catHouse = scene.add.graphics();
+      catHouse.fillStyle(0x8a6a4a, 1);
+      catHouse.fillRect(chBaseX, chTopY, chW, chH);
+      // Platform top — slightly wider, lighter tone.
+      catHouse.fillStyle(0xa88a6a, 1);
+      catHouse.fillRect(chBaseX - 4, chTopY - 6, chW + 8, 6);
+      // Entrance hole.
+      catHouse.fillStyle(0x2a1c14, 1);
+      catHouse.fillCircle(chBaseX + chW / 2, chTopY + chH * 0.6, 8);
+      container.add(catHouse);
+
+      // Floor.
+      addFloor(scene, container, 0xa88a68, height * 0.78);
+
+      // Dust motes drifting in the window light — visible afternoon air.
+      const moteLayer = scene.add.container(0, 0);
+      container.add(moteLayer);
+      scheduleRecurring(scene, moteLayer, {
+        minMs: 800,
+        maxMs: 2200,
+        fn: () =>
+          spawnDustMote(scene, moteLayer, {
+            x: Phaser.Math.Between(winX, winX + winW + 30),
+            y: Phaser.Math.Between(winY + 10, winY + winH + 60),
+            tint: 0xfff0c0,
+          }),
+      });
+
+      return container;
+    },
+  },
 };
 
 export function getLocation(id: LocationId): LocationDef | null {

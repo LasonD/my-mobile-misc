@@ -3,6 +3,7 @@ import { Scenario, ScenarioId, ScenarioMeta, ScenarioRegistration } from '../../
 
 import { FIRST_DAY } from './first-day';
 import { SECOND_SATURDAY } from './second-saturday';
+import { THIRD_OBUKHIV } from './third-obukhiv';
 import { cond } from '../../engine/evaluators';
 
 /**
@@ -40,15 +41,20 @@ export const SCENARIOS: Record<ScenarioId, ScenarioRegistration> = {
       done: cond.flag(FLAGS.SCENARIO_SATURDAY_DONE),
     },
   },
+  [THIRD_OBUKHIV.id]: {
+    scenario: THIRD_OBUKHIV,
+    meta: {
+      order: 3,
+      description: 'Вихідні в Обухові. 14 лютого, перший раз у Саши вдома. Кіт Макс. Проектор.',
+      icon: '\u{1F431}', // 🐱
+      unlock: cond.flag(FLAGS.SCENARIO_SATURDAY_DONE),
+      done: cond.flag(FLAGS.SCENARIO_OBUKHIV_DONE),
+    },
+  },
 };
 
 /** Placeholder entries for upcoming chapters — show as locked. */
 export const UPCOMING: ScenarioMeta[] = [
-  {
-    order: 3,
-    description: 'Вихідні в Обухові. Саша, Golf, кіт Макс.',
-    icon: '\u{1F431}', // 🐱
-  },
   {
     order: 4,
     description: 'Похід на пиво. Саша вперше з компанією Даші — «Настолки під час війни».',
